@@ -1,0 +1,120 @@
+# 定期把 GitHub 仓库数据抓成静态文件，供主页作品区读取。
+#
+# 为什么不在页面里直接调 api.github.com：
+#   · 国内访问 GitHub API 长期不稳定
+#   · 有未认证频率限制（每小时 60 次 / 每 IP）
+#   · 会把"首屏依赖外部网络"这个故障模式请回来
+# 预生成之后，页面加载的是本地文件：秒开、无限制、GitHub 挂了也能显示。
+#
+# 想调整展示哪些仓库：改下面的 FEATURED 数组即可。
+
+name: Update repository data
+
+on:
+  schedule:
+    # 每周一 03:17 UTC（刻意避开整点，见 GitHub Actions 调度高峰）
+    - cron: "17 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fetch repositories and write assets/js/repos.data.js
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LOGIN: Ohto-Ai
+          # 展示顺序即此顺序；描述一律取自 GitHub 原样
+          FEATURED: >-
+            PostLive
+            LightPaper
+            NonogramGenerator
+            CMakeProjectTemplate
+            webhook
+            raytracing
+            Family-Computer-Simulator
+            clipshare
+            liberty-syntax-ext
+            mlc
+        run: |
+          set -euo pipefail
+
+          # 拉取全部公开仓库（排除 fork），分页取完
+          : > /tmp/all.json
+          page=1
+          while :; do
+            chunk=$(gh api "users/${LOGIN}/repos?per_page=100&page=${page}&type=owner" \
+              --jq '[.[] | select(.fork == false)]')
+            count=$(printf '%s' "$chunk" | jq 'length')
+            [ "$count" -eq 0 ] && break
+            printf '%s' "$chunk" >> /tmp/all.json
+            page=$((page + 1))
+            [ "$page" -gt 10 ] && break
+          done
+
+          # 把所有分片合成一个数组
+          jq -s 'add' /tmp/all.json > /tmp/repos.json
+          total=$(jq 'length' /tmp/repos.json)
+
+          # 按 FEATURED 顺序取出对应仓库
+          printf '%s\n' $FEATURED | jq -R . | jq -s . > /tmp/featured.json
+
+          jq -n \
+            --slurpfile repos /tmp/repos.json \
+            --slurpfile want /tmp/featured.json \
+            --arg login "$LOGIN" \
+            --arg date "$(date -u +%Y-%m-%d)" \
+            --argjson total "$total" \
+            '{
+              generated: $date,
+              login: $login,
+              total: $total,
+              featured: (
+                $want[0] as $names
+                | [ $names[] as $n
+                    | ($repos[0][] | select(.name == $n)) as $r
+                    | {
+                        name: $r.name,
+                        desc: ($r.description // ""),
+                        lang: ($r.language // ""),
+                        stars: $r.stargazers_count,
+                        year: ($r.pushed_at | split("-")[0] | tonumber)
+                      }
+                  ]
+              )
+            }' > /tmp/body.json
+
+          {
+            echo "/*"
+            echo " * repos.data.js — 作品区数据"
+            echo " *"
+            echo " * 本文件由 .github/workflows/repos.yml 自动生成，请勿手工编辑。"
+            echo " * 页面把它当普通本地脚本加载，不在运行时调 GitHub API。"
+            echo " *"
+            echo " * @generated $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo " */"
+            printf 'window.OhtoRepos = '
+            cat /tmp/body.json
+            echo ";"
+          } > assets/js/repos.data.js
+
+          echo "已生成：$(jq '.featured | length' /tmp/body.json) 个精选 / 共 ${total} 个仓库"
+
+      - name: Commit if changed
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- assets/js/repos.data.js; then
+            echo "数据无变化，跳过提交"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/js/repos.data.js
+          git commit -m "chore: 更新仓库数据"
+          git push

@@ -1,0 +1,161 @@
+/* ==========================================================================
+   tokens.css — 设计系统
+   整套色阶由 --base-hue 单一变量驱动。
+   改这一个数字，整站的冷暖和强调色一起变。
+   色锚点取自 dennissnellenberg.com（#455CE9 / #1C1D20）与
+   maximeheckel.com（OKLCH 单色相色阶）。
+   ========================================================================== */
+
+:root {
+    /* ----------------------------------------------------------------------
+       色相 —— 267 即 #455CE9 的 OKLCH 色相角
+       ---------------------------------------------------------------------- */
+    --base-hue: 267;
+
+    /* ----------------------------------------------------------------------
+       中性色阶 —— 带微弱色相，不是纯灰。
+       纯灰在深色底上会显脏；掺一点主题色相，整页才"透气"。
+       ---------------------------------------------------------------------- */
+    --gray-000: oklch(16% 0.006 var(--base-hue));   /* 最深：加载页底色 */
+    --gray-100: oklch(18.5% 0.008 var(--base-hue)); /* 页面底色  ≈ DS #1C1D20 */
+    --gray-200: oklch(22.5% 0.01 var(--base-hue));  /* 面板 */
+    --gray-300: oklch(26.5% 0.011 var(--base-hue)); /* 卡片 / hover 面 */
+    --gray-400: oklch(31.5% 0.011 var(--base-hue)); /* 分隔线加强 */
+    --gray-500: oklch(38% 0.01 var(--base-hue));
+    --gray-600: oklch(48% 0.009 var(--base-hue));   /* 失效态 */
+    --gray-700: oklch(62% 0.008 var(--base-hue));   /* 弱化文字 */
+    --gray-800: oklch(74% 0.006 var(--base-hue));   /* 次级文字 */
+    --gray-900: oklch(87% 0.004 var(--base-hue));
+    --gray-1000: oklch(97.5% 0.002 var(--base-hue)); /* 正文 */
+
+    /* ----------------------------------------------------------------------
+       强调色阶 —— 全站只有一个强调色，只用在链接、焦点环、选中态
+       ---------------------------------------------------------------------- */
+    --blue-300: oklch(40% 0.14 var(--base-hue));
+    --blue-500: oklch(54.5% 0.203 var(--base-hue));  /* 精确 DS #455CE9 —— 填充用 */
+    --blue-600: oklch(64.6% 0.172 var(--base-hue));  /* 精确 MH --emphasis —— 文字用 */
+    --blue-700: oklch(78% 0.1 var(--base-hue));      /* 深色底上的 hover */
+
+    /* ----------------------------------------------------------------------
+       语义层 —— 组件只引用这一层，永远不直接引用上面的色阶。
+       换主题时只需要动这里。
+       ---------------------------------------------------------------------- */
+    --bg: var(--gray-100);
+    --bg-deep: var(--gray-000);
+    --surface: var(--gray-200);
+    --surface-hover: var(--gray-300);
+    --surface-active: var(--gray-400);
+
+    --text-primary: var(--gray-1000);
+    --text-secondary: var(--gray-800);
+    --text-muted: var(--gray-700);
+    --text-disabled: var(--gray-600);
+
+    --border: oklch(97.5% 0.002 var(--base-hue) / 0.1);
+    --border-strong: oklch(97.5% 0.002 var(--base-hue) / 0.2);
+
+    --accent: var(--blue-600);
+    --accent-fill: var(--blue-500);
+    --accent-hover: var(--blue-700);
+    --focus-ring: var(--blue-600);
+
+    /* ----------------------------------------------------------------------
+       字体
+       拉丁字体必须排在 CJK 之前 —— 回退是逐字形的：
+       英文落到 Inter，中文直接跳到 PingFang / 雅黑。
+       顺序反了，英文会用雅黑那套很弱的拉丁字形渲染。
+       ---------------------------------------------------------------------- */
+    --font-sans:
+        "Inter Variable", "Inter",
+        ui-sans-serif, -apple-system, BlinkMacSystemFont,
+        "Segoe UI Variable Text", "Segoe UI",
+        "PingFang SC", "Hiragino Sans GB",          /* macOS / iOS 中文 */
+        "Microsoft YaHei UI", "Microsoft YaHei",    /* Windows 中文，UI 变体小字号更清晰 */
+        "Source Han Sans SC", "Noto Sans CJK SC", "WenQuanYi Micro Hei",
+        sans-serif;
+
+    --font-mono:
+        "Inter Variable", "Inter",
+        ui-monospace, "SFMono-Regular", "SF Mono", Menlo, Consolas,
+        "Cascadia Mono", "Liberation Mono",
+        "Microsoft YaHei UI",
+        monospace;
+
+    /* ----------------------------------------------------------------------
+       字号 —— 流体缩放，大字号配负字距，小标签配正字距。
+       分层设定字距（而不是全局统一）是"排版显高级"的大部分含义。
+       ---------------------------------------------------------------------- */
+    --fs-hero: clamp(2.75rem, 9vw, 8.5rem);
+    --ls-hero: -0.03em;
+    --lh-hero: 0.92;
+
+    --fs-display: clamp(1.75rem, 4.5vw, 3.75rem);
+    --ls-display: -0.02em;
+    --lh-display: 1.05;
+
+    --fs-h2: clamp(1.5rem, 3vw, 2.5rem);
+    --ls-h2: -0.015em;
+    --lh-h2: 1.15;
+
+    --fs-h3: clamp(1.125rem, 1.8vw, 1.5rem);
+    --ls-h3: -0.005em;
+    --lh-h3: 1.25;
+
+    --fs-body: clamp(0.95rem, 1.05vw, 1.0625rem);
+    --lh-body: 1.65;
+    --lh-cjk: 1.75; /* 汉字是全角方块，1.5 以下会挤 */
+
+    --fs-small: 0.8125rem;
+    --ls-small: 0.01em;
+
+    --fs-eyebrow: 0.6875rem;
+    --ls-eyebrow: 0.14em;
+
+    /* ----------------------------------------------------------------------
+       间距 —— DS 原值，全部流体
+       ---------------------------------------------------------------------- */
+    --section-padding: clamp(5em, 18vh, 11em);
+    --container-padding: clamp(1.25rem, 6vw, 6rem);
+    --gap-padding: clamp(1.5rem, 4vw, 2.5rem);
+    --container-max: 1600px;
+
+    /* ----------------------------------------------------------------------
+       圆角
+       ---------------------------------------------------------------------- */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 16px;
+    --radius-full: 999px;
+
+    /* ----------------------------------------------------------------------
+       缓动 —— DS 的 cubic-bezier(.7,0,.3,1) 是整套观感的核心，全站统一
+       ---------------------------------------------------------------------- */
+    --ease: cubic-bezier(0.7, 0, 0.3, 1);
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+    --animation-fast: all 0.3s var(--ease);
+    --animation-primary: all 0.5s var(--ease);
+    --animation-smooth: all 0.7s var(--ease);
+    --animation-slow: all 0.9s var(--ease);
+
+    /* ----------------------------------------------------------------------
+       层级
+       ---------------------------------------------------------------------- */
+    --z-bg: 0;
+    --z-content: 1;
+    --z-nav: 100;
+    --z-preloader: 1000;
+    /* dialog 走浏览器顶层（top layer），不需要 z-index */
+}
+
+/* --------------------------------------------------------------------------
+   偏好高对比度
+   -------------------------------------------------------------------------- */
+@media (prefers-contrast: more) {
+    :root {
+        --border: oklch(97.5% 0.002 var(--base-hue) / 0.3);
+        --border-strong: oklch(97.5% 0.002 var(--base-hue) / 0.45);
+        --text-muted: var(--gray-800);
+        --text-secondary: var(--gray-900);
+    }
+}

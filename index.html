@@ -1,105 +1,406 @@
 <!DOCTYPE html>
-<html lang="zh-cn">
+<html lang="zh-Hans" class="is-loading">
 
 <head>
-    <meta charset="UTF-8" />
-    <title>OhtoAi - Home</title>
-    <link rel="stylesheet" href="assets/css/style.main.css" />
-    <link rel="stylesheet" href="assets/css/style.peronal.css" />
-    <link rel="stylesheet" href="assets/css/style.svg_button.css" />
-    <link rel="stylesheet" href="assets/css/style.beian.css" />
-    <link rel="stylesheet" href="assets/css/style.loading-page.css" />
-    <link rel="stylesheet" href="assets/css/font3d.css" />
-    <link rel="stylesheet" href="assets/css/font-awesome.min.css" />
-    <script src="//cdn.bootcss.com/jquery/3.5.0/jquery.min.js"></script>
-    <script src="//use.fontawesome.com/d1341f9b7a.js"></script>
-    <script src='assets/js/loading-page.js'>    </script>
-    <script src="assets/js/main-page.js"></script>
-    <script src="assets/js/log-website.js"></script>
-    <script src="assets/js/font3d.js"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#14151A" />
+    <title>Ohto-Ai — C++ Developer</title>
+    <meta name="description" content="Ohto-Ai，C++ 开发者。Make it work; Make it right; Make it fast;" />
+    <meta name="author" content="Ohto-Ai" />
+
+    <!-- ======================================================================
+         内联关键样式
+
+         这一段存在的唯一目的：保证**第一帧**就是全屏不透明的深色。
+         它不依赖任何外部文件，所以即使后面所有 <link> 和 <script> 全部 404，
+         用户看到的依然是一块干净的深色，而不是闪出来的主页。
+         ====================================================================== -->
+    <style>
+        html {
+            background: #14151a;
+            color-scheme: dark;
+        }
+
+        .preloader {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        .preloader__band {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 33.34%;
+        }
+
+        .preloader__band:nth-child(1) { top: 0; }
+        .preloader__band:nth-child(2) { top: 33.33%; }
+        .preloader__band:nth-child(3) { top: 66.66%; }
+
+        /* 加载期间，主页内容物理上不可见、不可滚动。
+           即便遮罩层因为任何原因变透明，也不可能露出主页。 */
+        html.is-loading body {
+            overflow: hidden;
+        }
+
+        html.is-loading .site-nav,
+        html.is-loading main,
+        html.is-loading .site-footer,
+        html.is-loading .skip-link {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        /* 同一会话内的二次访问直接跳过加载页 */
+        html.is-skip-preloader .preloader {
+            display: none;
+        }
+    </style>
+
+    <link rel="preload" as="font" type="font/woff2" crossorigin
+        href="assets/fonts/inter/inter-latin-wght-normal.woff2" />
+
+    <link rel="stylesheet" href="assets/css/tokens.css" />
+    <link rel="stylesheet" href="assets/css/base.css" />
+    <link rel="stylesheet" href="assets/css/layout.css" />
+    <link rel="stylesheet" href="assets/css/components.css" />
+    <link rel="stylesheet" href="assets/css/motion.css" />
+
+    <link rel="icon" href="favicon.ico" sizes="any" />
+
+    <!-- ======================================================================
+         内联兜底
+
+         它是内联的，所以**即使每一个外部 JS 和 CSS 都加载失败，它也会执行**。
+         4 秒后无条件揭幕。这一层让"加载页卡死导致整站不可用"从
+         "不太可能"变成"不可能"—— 旧站正是死在这一点上：
+         它的揭幕逻辑依赖 CDN 上的 jQuery，CDN 一挂，页面就永远出不来。
+         ====================================================================== -->
+    <script>
+        (function () {
+            var de = document.documentElement;
+
+            // 已经加载过一次就跳过加载页（按会话）
+            try {
+                if (sessionStorage.getItem("ohto:loaded")) {
+                    de.classList.remove("is-loading");
+                    de.classList.add("is-skip-preloader");
+                } else {
+                    de.classList.add("js");
+                }
+            } catch (e) {
+                // 隐私模式下 sessionStorage 可能抛异常，按首次访问处理
+                de.classList.add("js");
+            }
+
+            // 兜底揭幕：无条件执行，不依赖任何外部资源
+            window.__ohtoReveal = function () {
+                if (!de.classList.contains("is-loading")) return;
+                de.classList.remove("is-loading");
+                var p = document.getElementById("preloader");
+                if (p) {
+                    p.setAttribute("data-done", "");
+                    p.style.display = "none";
+                }
+            };
+
+            setTimeout(window.__ohtoReveal, 4000);
+        })();
+    </script>
 </head>
 
 <body>
-    <!-- background -->
-    <div class="blur-div">
-        <!-- use-backround-imag -->
-        <iframe src="components/bilibili/"></iframe>
-    </div>
+    <div class="site-bg" aria-hidden="true"></div>
 
-    <!-- loading page -->
-    <div id="loading">
-        <iframe class="loading-iframe" src="components/overwatch-loader/">
-        </iframe>
-        <!-- 加载页底部备案号：加载慢时也能看到 -->
-        <div class="loading-beian">
-            <a href="https://beian.miit.gov.cn" target="_blank" rel="noopener noreferrer">苏ICP备19061327号</a>
+    <a class="skip-link" href="#main">跳到主内容</a>
+
+    <!-- ======================================================================
+         加载页
+         三条幕布自带内联背景色 —— 不依赖外部 CSS 就已经是全屏不透明的
+         ====================================================================== -->
+    <div class="preloader" id="preloader" role="status" aria-label="页面加载中">
+        <div class="preloader__band" style="background:#14151A"></div>
+        <div class="preloader__band" style="background:#14151A"></div>
+        <div class="preloader__band" style="background:#14151A"></div>
+
+        <div class="preloader__inner">
+            <div class="preloader__greeting">
+                <span class="preloader__word">Hello</span>
+                <span class="preloader__word">こんにちは</span>
+                <span class="preloader__word">Bonjour</span>
+                <span class="preloader__word">Hallo</span>
+                <span class="preloader__word">Привет</span>
+                <span class="preloader__word">안녕</span>
+                <span class="preloader__word">你好</span>
+            </div>
+
+            <div class="preloader__foot">
+                <span class="preloader__counter" id="preloader-counter">00</span>
+                <a class="preloader__beian" href="https://beian.miit.gov.cn" target="_blank"
+                    rel="noopener noreferrer">苏ICP备19061327号</a>
+            </div>
         </div>
     </div>
 
-    <!-- main page -->
-    <div class="main-page">
-        <div class="main-page-content">
-            <!-- personal-box -->
-            <div class="personal-box">
-                <a>
-                    <span class="avatar">
-                        <img src="https://github.com/Ohto-Ai.png?size=320" alt="Ohto-Ai" />
-                    </span>
+    <!-- 导航 -->
+    <header class="site-nav" id="site-nav">
+        <div class="container site-nav__inner">
+            <a class="site-nav__wordmark" href="#top">Ohto-Ai</a>
+
+            <nav class="site-nav__links" aria-label="主导航">
+                <a class="site-nav__link" href="#work">Work</a>
+                <a class="site-nav__link" href="//wiki.ohtoai.top" target="_blank" rel="noopener noreferrer">Wiki</a>
+                <a class="site-nav__link" href="#about">About</a>
+                <a class="site-nav__link" href="#contact">Contact</a>
+            </nav>
+
+            <div class="site-nav__actions">
+                <a class="site-nav__icon" href="//github.com/Ohto-Ai" target="_blank" rel="noopener noreferrer"
+                    aria-label="GitHub">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path
+                            d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
+                    </svg>
                 </a>
 
-                <div class="font3d-box" text="Ohto-Ai">
-                </div>
-                <h5><b>C++ Developer</b></h5>
-                <h5>Write Everywhere, <br />Read Nowhere.</h5>
-                <ul>
-                    <li>
-                        <a href="//github.com/Ohto-Ai"><i class="fa fa-github-square" aria-hidden="true"></i></a>
-                    </li>
-                    <li>
-                        <a href="//www.facebook.com/thatboy.echo"><i class="fa fa-facebook-square"
-                                aria-hidden="true"></i></a>
-                    </li>
-                    <li>
-                        <a href="//steamcommunity.com/id/OhtoAi-02"><i class="fa fa-steam-square"
-                                aria-hidden="true"></i></a>
-                    </li>
-                </ul>
-            </div>
-
-            <div class="main-content">
-                <!-- menu -->
-                <div class="main-menu">
-                    <!-- Home button -->
-                    <div class="svg-wrapper" content='Home' id="home_button" no-button-change>
-                    </div>
-                    <!-- Wiki button -->
-                    <div class="svg-wrapper" content='Wiki' external-link="//wiki.ohtoai.top">
-                    </div>
-                    <!-- Old Page button -->
-                    <div class="svg-wrapper" content='Home - 2020' external-link="2020/">
-                    </div>
-                    <!-- tip button -->
-                    <div class="svg-wrapper" content='More' id="tip_button" data-src="components/more/">
-                    </div>
-                    <!-- Github button -->
-                    <div class="svg-wrapper" content='Github' external-link="//github.com/Ohto-Ai">
-                    </div>
-                    <!-- mfwzjsq -->
-                    <!-- <div class="svg-wrapper"
-                        content='<img src="https://www.mfwzjsq.com/hit.php?id=zuapxa&nd=1&style=20" border="0"'>
-                    </div> -->
-                </div>
-                <div class="sub-frame-wrapper">
-                    <iframe id="home_frame" current-page class="inner_frames" src="components/book_card/"></iframe>
-                </div>
+                <button class="site-nav__toggle" id="nav-toggle" aria-expanded="false" aria-controls="nav-panel"
+                    aria-label="打开菜单">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.5" aria-hidden="true">
+                        <path d="M3 7h18M3 12h18M3 17h18" />
+                    </svg>
+                </button>
             </div>
         </div>
-    </div>
+    </header>
 
-    <!-- footer: 备案号 -->
+    <!-- 移动端菜单 -->
+    <nav class="nav-panel" id="nav-panel" aria-label="移动导航">
+        <a class="nav-panel__link" href="#work">Work</a>
+        <a class="nav-panel__link" href="//wiki.ohtoai.top" target="_blank" rel="noopener noreferrer">Wiki</a>
+        <a class="nav-panel__link" href="#about">About</a>
+        <a class="nav-panel__link" href="#contact">Contact</a>
+    </nav>
+
+    <main id="main">
+        <!-- ==================================================================
+             Hero
+             ================================================================== -->
+        <section class="hero" id="top">
+            <div class="container">
+                <div class="hero__chip reveal">
+                    <img class="hero__avatar" src="assets/img/avatar.png"
+                        onerror="this.src='https://github.com/Ohto-Ai.png?size=320'" alt="Ohto-Ai" width="52"
+                        height="52" />
+                    <span class="eyebrow">C++ Developer</span>
+                </div>
+
+                <h1 class="hero__name mask-reveal" lang="en">Ohto-Ai</h1>
+
+                <p class="hero__statement mask-reveal" lang="en" style="--reveal-delay:.08s">
+                    Make it work; Make it right; Make it fast;
+                </p>
+
+                <p class="hero__tagline mask-reveal" lang="en" style="--reveal-delay:.16s">
+                    Write Everywhere, Read Nowhere.
+                </p>
+
+                <div class="hero__actions reveal" style="--reveal-delay:.3s">
+                    <a class="btn btn--primary" href="#work">
+                        View work
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" aria-hidden="true">
+                            <path d="M5 12h14M13 6l6 6-6 6" />
+                        </svg>
+                    </a>
+                    <a class="btn btn--ghost" href="#about">About me</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================================================================
+             Work
+             ================================================================== -->
+        <section id="work">
+            <div class="container">
+                <div class="section-head reveal">
+                    <div>
+                        <p class="eyebrow">Selected work</p>
+                        <h2 class="section-head__title">开源项目</h2>
+                    </div>
+                    <p class="section-head__count mono" id="work-count"></p>
+                </div>
+
+                <div class="work-list reveal-stagger" id="work-list">
+                    <!-- 由 work.js 从 repos.data.js 渲染 -->
+                </div>
+
+                <!-- 无 JS 时的降级：普通链接列表，依然可用 -->
+                <noscript>
+                    <div class="work-list">
+                        <a class="work-row" href="https://github.com/Ohto-Ai/PostLive">
+                            <span class="work-row__index">01</span>
+                            <span class="work-row__body"><span class="work-row__title">PostLive</span></span>
+                        </a>
+                        <a class="work-row" href="https://github.com/Ohto-Ai/LightPaper">
+                            <span class="work-row__index">02</span>
+                            <span class="work-row__body"><span class="work-row__title">LightPaper</span></span>
+                        </a>
+                        <a class="work-row" href="https://github.com/Ohto-Ai/NonogramGenerator">
+                            <span class="work-row__index">03</span>
+                            <span class="work-row__body"><span class="work-row__title">NonogramGenerator</span></span>
+                        </a>
+                        <a class="work-row" href="https://github.com/Ohto-Ai/Family-Computer-Simulator">
+                            <span class="work-row__index">04</span>
+                            <span class="work-row__body"><span class="work-row__title">Family-Computer-Simulator</span></span>
+                        </a>
+                        <a class="work-row" href="https://github.com/Ohto-Ai/raytracing">
+                            <span class="work-row__index">05</span>
+                            <span class="work-row__body"><span class="work-row__title">raytracing</span></span>
+                        </a>
+                        <a class="work-row" href="https://github.com/Ohto-Ai/mlc">
+                            <span class="work-row__index">06</span>
+                            <span class="work-row__body"><span class="work-row__title">mlc</span></span>
+                        </a>
+                    </div>
+                </noscript>
+
+                <div class="work-more reveal">
+                    <a class="btn btn--ghost" id="work-all" href="//github.com/Ohto-Ai?tab=repositories"
+                        target="_blank" rel="noopener noreferrer">
+                        <span id="work-all-label">全部仓库</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" aria-hidden="true">
+                            <path d="M7 17L17 7M7 7h10v10" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================================================================
+             About
+             ================================================================== -->
+        <section id="about">
+            <div class="container">
+                <div class="section-head reveal">
+                    <div>
+                        <p class="eyebrow">About</p>
+                        <h2 class="section-head__title">关于</h2>
+                    </div>
+                </div>
+
+                <div class="about__grid">
+                    <div class="reveal">
+                        <p class="about__lead">
+                            写 C++，也写别的。喜欢把东西做出来、做对、再做快。
+                            大部分时间在跟内存、编译器和各种平台差异打交道。
+                        </p>
+                        <p class="about__quote" lang="zh-Hans">
+                            「绝大多数学习上的成功根本与智商没有任何关系，所有的失败都与且只与时间限制有关。」
+                        </p>
+                    </div>
+
+                    <div class="reveal" style="--reveal-delay:.1s">
+                        <ul class="about__list">
+                            <li>
+                                <a href="//wiki.ohtoai.top" target="_blank" rel="noopener noreferrer">
+                                    Wiki
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" aria-hidden="true">
+                                        <path d="M7 17L17 7M7 7h10v10" />
+                                    </svg>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="doc/git-guide/">
+                                    Git 指南
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" aria-hidden="true">
+                                        <path d="M7 17L17 7M7 7h10v10" />
+                                    </svg>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="2020/">
+                                    Archive (2020)
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" aria-hidden="true">
+                                        <path d="M7 17L17 7M7 7h10v10" />
+                                    </svg>
+                                </a>
+                            </li>
+                        </ul>
+
+                        <div class="about__socials">
+                            <a class="about__social" href="//github.com/Ohto-Ai" target="_blank"
+                                rel="noopener noreferrer" aria-label="GitHub">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path
+                                        d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
+                                </svg>
+                            </a>
+                            <a class="about__social" href="//www.facebook.com/thatboy.echo" target="_blank"
+                                rel="noopener noreferrer" aria-label="Facebook">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path
+                                        d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                                </svg>
+                            </a>
+                            <a class="about__social" href="//steamcommunity.com/id/OhtoAi-02" target="_blank"
+                                rel="noopener noreferrer" aria-label="Steam">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path
+                                        d="M11.979 0C5.678 0 .511 4.86 0 10.985l6.443 2.664c.545-.373 1.203-.593 1.911-.593.063 0 .125.002.188.005l2.866-4.15v-.058c0-2.564 2.087-4.65 4.65-4.65 2.565 0 4.651 2.086 4.651 4.65 0 2.565-2.086 4.651-4.65 4.651h-.108l-4.09 2.918c0 .052.003.104.003.157 0 1.926-1.567 3.492-3.493 3.492-1.71 0-3.129-1.233-3.442-2.85L.32 15.887C1.748 20.771 6.279 24 11.98 24c6.627 0 12-5.373 12-12s-5.373-12-12-12zm-5.28 18.303l-1.31-.542a2.62 2.62 0 001.51 1.5c1.15.47 2.47-.08 2.94-1.23.23-.56.24-1.17.02-1.74a2.62 2.62 0 00-1.4-1.4 2.6 2.6 0 00-1.9-.07l1.35.56a1.93 1.93 0 01-1.21 3.02zm8.42-6.77a1.72 1.72 0 01-1.72-1.72c0-.95.77-1.72 1.72-1.72.95 0 1.72.77 1.72 1.72 0 .95-.77 1.72-1.72 1.72zm0-3.02a1.3 1.3 0 100 2.6 1.3 1.3 0 000-2.6z" />
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================================================================
+             Contact
+             ================================================================== -->
+        <section id="contact">
+            <div class="container contact reveal">
+                <p class="eyebrow" style="margin-bottom:1.25rem">Contact</p>
+                <h2 class="contact__title">Let's work together</h2>
+                <a class="contact__email" href="mailto:zhu.thatboy@outlook.com">zhu.thatboy@outlook.com</a>
+            </div>
+        </section>
+    </main>
+
     <footer class="site-footer">
-        <a href="https://beian.miit.gov.cn" target="_blank" rel="noopener noreferrer">苏ICP备19061327号</a>
+        <div class="container">
+            <div class="site-footer__row">
+                <span class="mono" id="footer-clock">--:--:--</span>
+                <span class="mono">v3.0.0</span>
+            </div>
+            <div class="site-footer__row">
+                <span>© <span id="footer-year">2026</span> Ohto-Ai</span>
+                <span class="site-footer__links">
+                    <a href="2020/">Archive (2020)</a>
+                    <a class="site-footer__beian" href="https://beian.miit.gov.cn" target="_blank"
+                        rel="noopener noreferrer">苏ICP备19061327号</a>
+                </span>
+            </div>
+        </div>
     </footer>
+
+    <script src="assets/js/repos.data.js"></script>
+    <script src="assets/js/vendor/gsap.min.js"></script>
+    <script src="assets/js/vendor/ScrollTrigger.min.js"></script>
+    <script src="assets/js/vendor/lenis.min.js"></script>
+    <script src="assets/js/preloader.js"></script>
+    <script src="assets/js/work.js"></script>
+    <script src="assets/js/site.js"></script>
+    <script src="assets/js/log-website.js"></script>
 </body>
 
 </html>

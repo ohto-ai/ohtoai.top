@@ -1,0 +1,80 @@
+/* ==========================================================================
+   motion.css — 揭示动效
+
+   核心安全约束：内容绝不能永远停在 opacity: 0。
+   所以隐藏态只在 html.js 存在时生效（无 JS 就完全不动），
+   并且 site.js 里另有两道保险（见该文件）。
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   揭示的初始态与终态
+
+   两套引擎共用同一组状态：
+     · html.has-gsap  —— GSAP 负责中间过程（时间轴 / ScrollTrigger）
+     · 否则            —— CSS transition 负责中间过程（IntersectionObserver 触发）
+
+   transition 只在没有 GSAP 时才声明，否则两套动画会互相打架。
+   -------------------------------------------------------------------------- */
+html.js .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+}
+
+html.js .reveal-stagger > * {
+    opacity: 0;
+    transform: translateY(18px);
+}
+
+html.js .mask-reveal {
+    clip-path: inset(0 0 100% 0);
+}
+
+/* 终态 */
+html.js .reveal[data-revealed],
+html.js .reveal-stagger[data-revealed] > * {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+html.js .mask-reveal[data-revealed] {
+    clip-path: inset(0 0 -0.2em 0);
+}
+
+/* ---- 无 GSAP 时的 CSS 过渡（回退路径） ---- */
+html.js:not(.has-gsap) .reveal {
+    transition: opacity 0.9s var(--ease-out-expo),
+        transform 0.9s var(--ease-out-expo);
+    transition-delay: var(--reveal-delay, 0s);
+}
+
+html.js:not(.has-gsap) .reveal-stagger > * {
+    transition: opacity 0.7s var(--ease-out-expo),
+        transform 0.7s var(--ease-out-expo);
+    transition-delay: calc(var(--i, 0) * 70ms);
+}
+
+/* mask-reveal 始终走 CSS 过渡，两种引擎下都一样。
+   原因：GSAP 无法在 clip-path 的 inset() 里跨单位插值（% 与 em 混用），
+   交给它会直接把元素留在裁剪状态 —— 也就是标题整个消失。
+   这条动效本来也只是一次性的，用不着时间轴。 */
+html.js .mask-reveal {
+    transition: clip-path 1.1s var(--ease-out-expo);
+    transition-delay: var(--reveal-delay, 0s);
+}
+
+/* --------------------------------------------------------------------------
+   无 JS / 观察器不可用时的兜底
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+    html.js .reveal,
+    html.js .reveal-stagger > * {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+
+    html.js .mask-reveal {
+        clip-path: none;
+        transition: none;
+    }
+}

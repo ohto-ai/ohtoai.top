@@ -1,0 +1,385 @@
+/* ==========================================================================
+   components.css — 按钮、作品行、移动端菜单、加载页
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   按钮
+   -------------------------------------------------------------------------- */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.875rem 1.5rem;
+    border-radius: var(--radius-full);
+    font-size: var(--fs-small);
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    transition: var(--animation-fast);
+}
+
+.btn--primary {
+    background: var(--accent-fill);
+    color: #fff;
+}
+
+.btn--primary:hover {
+    background: var(--accent-hover);
+    transform: translateY(-2px);
+}
+
+.btn--ghost {
+    border: 1px solid var(--border-strong);
+    color: var(--text-secondary);
+}
+
+.btn--ghost:hover {
+    color: var(--text-primary);
+    border-color: var(--text-muted);
+    background: var(--surface);
+    transform: translateY(-2px);
+}
+
+.btn svg {
+    flex-shrink: 0;
+    transition: transform 0.3s var(--ease);
+}
+
+.btn:hover svg {
+    transform: translateX(2px);
+}
+
+/* --------------------------------------------------------------------------
+   作品行
+   纯排版，零图片。这是 Dennis Snellenberg 的做法，也是零 CLS、零加载负担的做法。
+   -------------------------------------------------------------------------- */
+.work-list {
+    border-top: 1px solid var(--border);
+}
+
+.work-row {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: clamp(1rem, 3vw, 2.5rem);
+    padding-block: clamp(1.25rem, 3.2vh, 2.25rem);
+    padding-inline: clamp(0.5rem, 2vw, 1.5rem);
+    border-bottom: 1px solid var(--border);
+    transition: background-color 0.45s var(--ease), border-color 0.45s var(--ease);
+}
+
+/* 左侧强调色竖条 —— 用 transform: scaleX 而不是 width，
+   width 会触发布局重排，scaleX 只走合成层 */
+.work-row::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: top;
+    transition: transform 0.5s var(--ease);
+}
+
+/* :focus-within 是关键 —— 只写 :hover 的话键盘用户永远看不到这个效果 */
+.work-row:hover,
+.work-row:focus-within {
+    background-color: oklch(97.5% 0.002 var(--base-hue) / 0.03);
+    border-bottom-color: transparent;
+}
+
+.work-row:hover::before,
+.work-row:focus-within::before {
+    transform: scaleX(1);
+}
+
+.work-row__index {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+    transition: color 0.4s var(--ease);
+}
+
+.work-row:hover .work-row__index,
+.work-row:focus-within .work-row__index {
+    color: var(--accent);
+}
+
+.work-row__body {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    transition: transform 0.5s var(--ease);
+}
+
+.work-row:hover .work-row__body,
+.work-row:focus-within .work-row__body {
+    transform: translateX(clamp(0.5rem, 1.5vw, 1.25rem));
+}
+
+.work-row__title {
+    font-size: var(--fs-h3);
+    letter-spacing: var(--ls-h3);
+    font-weight: 500;
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.work-row__desc {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.work-row__meta {
+    display: flex;
+    align-items: center;
+    gap: clamp(0.75rem, 2vw, 1.5rem);
+    font-family: var(--font-mono);
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.work-row__lang {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.work-row__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-full);
+    background: var(--text-disabled);
+    flex-shrink: 0;
+}
+
+.work-row__stars {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    min-width: 3.5ch;
+}
+
+.work-row__arrow {
+    color: var(--text-muted);
+    opacity: 0;
+    transform: translate(-4px, 4px);
+    transition: opacity 0.4s var(--ease), transform 0.4s var(--ease);
+}
+
+.work-row:hover .work-row__arrow,
+.work-row:focus-within .work-row__arrow {
+    opacity: 1;
+    transform: translate(0, 0);
+}
+
+.work-empty {
+    padding-block: 3rem;
+    color: var(--text-muted);
+    font-size: var(--fs-small);
+}
+
+.work-more {
+    display: flex;
+    justify-content: center;
+    margin-top: clamp(2rem, 5vh, 3.5rem);
+}
+
+/* --------------------------------------------------------------------------
+   移动端菜单
+   -------------------------------------------------------------------------- */
+.nav-panel {
+    position: fixed;
+    inset: 0;
+    z-index: calc(var(--z-nav) - 1);
+    display: grid;
+    align-content: center;
+    gap: 0.5rem;
+    padding: var(--container-padding);
+    background: var(--bg-deep);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.45s var(--ease), visibility 0.45s var(--ease);
+}
+
+.nav-panel[data-open] {
+    opacity: 1;
+    visibility: visible;
+}
+
+.nav-panel__link {
+    font-size: clamp(2rem, 9vw, 3rem);
+    letter-spacing: -0.02em;
+    font-weight: 500;
+    padding-block: 0.5rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-primary);
+    transform: translateY(12px);
+    opacity: 0;
+    transition: transform 0.5s var(--ease), opacity 0.5s var(--ease),
+        color 0.3s var(--ease);
+}
+
+.nav-panel[data-open] .nav-panel__link {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.nav-panel[data-open] .nav-panel__link:nth-child(1) { transition-delay: 0.06s; }
+.nav-panel[data-open] .nav-panel__link:nth-child(2) { transition-delay: 0.12s; }
+.nav-panel[data-open] .nav-panel__link:nth-child(3) { transition-delay: 0.18s; }
+.nav-panel[data-open] .nav-panel__link:nth-child(4) { transition-delay: 0.24s; }
+
+.nav-panel__link:hover {
+    color: var(--accent);
+}
+
+/* --------------------------------------------------------------------------
+   加载页
+
+   关键约束：必须从**第一帧**就不透明。
+   页面里的 .preloader__band 自带内联 background，<head> 里还有一段内联
+   关键 CSS 保证几何形状 —— 所以即使所有外部样式表都 404，
+   这一层依然是全屏不透明的深色，不会露出主页。
+   -------------------------------------------------------------------------- */
+.preloader {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-preloader);
+    overflow: hidden;
+}
+
+/* 三条幕布，静止时铺满全屏（各 33.34%），揭幕时错位向上滑出。
+   背景色写在 HTML 的 style 属性上，不依赖外部 CSS。 */
+.preloader__band {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 33.34%;
+    will-change: transform;
+    transition: transform 0.9s var(--ease);
+}
+
+.preloader__band:nth-child(1) { top: 0; }
+.preloader__band:nth-child(2) { top: 33.33%; }
+.preloader__band:nth-child(3) { top: 66.66%; }
+
+/* 幕布错位揭晓 —— 三条色带各自向上滑出，露出下面的主页 */
+.preloader[data-curtain] .preloader__band {
+    transform: translateY(-100%);
+}
+
+.preloader[data-curtain] .preloader__band:nth-child(1) { transition-delay: 0s; }
+.preloader[data-curtain] .preloader__band:nth-child(2) { transition-delay: 0.06s; }
+.preloader[data-curtain] .preloader__band:nth-child(3) { transition-delay: 0.12s; }
+
+.preloader__inner {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: clamp(1.5rem, 5vw, 3.5rem);
+    transition: opacity 0.4s var(--ease);
+}
+
+.preloader[data-leaving] .preloader__inner {
+    opacity: 0;
+}
+
+.preloader__greeting {
+    display: grid;
+    place-items: center;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* 所有问候语绝对定位叠在同一个格子里，靠 class 切换显隐 */
+.preloader__word {
+    grid-area: 1 / 1;
+    font-size: clamp(1.75rem, 6vw, 3.5rem);
+    letter-spacing: -0.02em;
+    font-weight: 400;
+    color: var(--text-secondary);
+    opacity: 0;
+    transform: translateY(0.4em);
+    transition: opacity 0.35s var(--ease), transform 0.35s var(--ease);
+}
+
+/* 第一句默认可见 —— 这样 JS 还没跑起来时加载页也不是一片空白。
+   必须排在下面的 [data-past] 之前：两者特异性相同，靠顺序分胜负。 */
+.preloader__word:first-child {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.preloader__word[data-active] {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.preloader__word[data-past] {
+    opacity: 0;
+    transform: translateY(-0.4em);
+}
+
+.preloader__foot {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.preloader__counter {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--fs-small);
+    letter-spacing: var(--ls-eyebrow);
+    color: var(--text-muted);
+}
+
+.preloader__beian {
+    font-size: var(--fs-eyebrow);
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+    transition: color 0.3s var(--ease);
+}
+
+.preloader__beian:hover {
+    color: var(--text-secondary);
+}
+
+/* 加载页留在 DOM 里但已经揭幕时，绝不能再拦截点击 */
+.preloader[data-done] {
+    pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   响应式
+   -------------------------------------------------------------------------- */
+@media (max-width: 640px) {
+    .work-row {
+        grid-template-columns: auto minmax(0, 1fr);
+        row-gap: 0.5rem;
+    }
+
+    .work-row__meta {
+        grid-column: 2;
+    }
+
+    .work-row__arrow {
+        display: none;
+    }
+}
