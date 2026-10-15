@@ -15,7 +15,10 @@
     font-weight: 500;
     letter-spacing: 0.01em;
     white-space: nowrap;
-    transition: var(--animation-fast);
+    /* translate 单独给一条更长的缓动 —— 磁性跟随靠它平滑。
+       用 translate 而不是 transform，是为了和下面 :hover 的
+       transform: translateY() 叠加而不是互相覆盖。 */
+    transition: var(--animation-fast), translate 0.4s var(--ease);
 }
 
 .btn--primary {
@@ -94,6 +97,35 @@
 .work-row:hover::before,
 .work-row:focus-within::before {
     transform: scaleX(1);
+}
+
+/* 跟随光标的径向高光。
+   位置由 site.js 写进 --rx / --ry（相对该行的百分比）。
+   z-index:0 + 子元素 z-index:1，保证这层光晕垫在文字下面，
+   不会把字洗淡。 */
+.work-row::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s var(--ease);
+    background: radial-gradient(
+        circle 280px at var(--rx, 50%) var(--ry, 50%),
+        oklch(54.5% 0.203 var(--base-hue) / 0.09) 0%,
+        transparent 70%
+    );
+}
+
+.work-row:hover::after,
+.work-row:focus-within::after {
+    opacity: 1;
+}
+
+.work-row > * {
+    position: relative;
+    z-index: 1;
 }
 
 .work-row__index {

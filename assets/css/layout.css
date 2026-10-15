@@ -45,15 +45,57 @@
     }
 }
 
-/* 噪点 —— "高级深色站"最常见的质感来源，成本约 1KB。
-   没有它，大面积深色渐变会出现色带（banding）。 */
+/* 蓝图网格 + 噪点
+   三层背景叠在一起：粗网格（120px）、点阵（24px）、噪点。
+   网格给纯色深底一点"工程图纸"的质感（参考 maximeheckel 的首屏），
+   噪点消除大面积渐变的色带（banding）。全部压得极淡 —— 是质感，不是图案。 */
 .site-bg::after {
     content: "";
     position: absolute;
     inset: 0;
-    opacity: 0.035;
-    mix-blend-mode: overlay;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.5;
+    background-image:
+        /* 粗网格 */
+        repeating-linear-gradient(
+            to right,
+            oklch(97.5% 0.002 var(--base-hue) / 0.045) 0 1px,
+            transparent 1px 120px
+        ),
+        repeating-linear-gradient(
+            to bottom,
+            oklch(97.5% 0.002 var(--base-hue) / 0.045) 0 1px,
+            transparent 1px 120px
+        ),
+        /* 点阵 */
+        radial-gradient(
+            oklch(97.5% 0.002 var(--base-hue) / 0.05) 0.5px,
+            transparent 0.5px
+        ),
+        /* 噪点 */
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+    background-size: 120px 120px, 120px 120px, 24px 24px, 180px 180px;
+}
+
+/* 光标聚光灯
+   跟随指针的一团柔光，把深色背景局部照亮。
+   位置由 site.js 写进 --mx / --my（rAF 里做插值，所以移动是滑的而不是跳的）。 */
+.site-bg__spot {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.6s var(--ease);
+    background: radial-gradient(
+        circle 420px at var(--mx, 50%) var(--my, 50%),
+        oklch(54.5% 0.203 var(--base-hue) / 0.13) 0%,
+        transparent 70%
+    );
+}
+
+/* 只在真正有指针的设备上显示 —— 触屏没有"光标"，这层只会白占性能 */
+@media (hover: hover) and (pointer: fine) {
+    .site-bg__spot {
+        opacity: 1;
+    }
 }
 
 /* --------------------------------------------------------------------------
@@ -202,6 +244,52 @@ section + section {
     min-height: 100svh;
     padding-block: clamp(7rem, 16vh, 11rem) var(--section-padding);
     border-top: none;
+}
+
+.hero .container {
+    position: relative;
+}
+
+/* 常驻动画：一个缓慢自转的线框二十面体。
+   画在 canvas 上而不是上 WebGL —— 同样能做出"发光的工程结构"观感，
+   但零依赖、约 5KB，也不需要为它再引一个 600KB 的 three.js。
+   放在首屏右半边那片空白里，正好补上版面重心。 */
+.hero__canvas {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    translate: 0 -50%;
+    width: clamp(300px, 36vw, 560px);
+    aspect-ratio: 1;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* 文字压在动画之上 */
+.hero__copy {
+    position: relative;
+    z-index: 1;
+}
+
+/* 注意：这里一律 right: 0，不要用负偏移"探出"容器。
+   绝对定位的包含块是 .container 的 padding box，负的 right 会直接把
+   页面撑宽 —— 实测 768px 时溢出 92px、1024px 时溢出 12px，
+   documentElement.scrollWidth 会大于视口宽。想让它更靠边就调宽度，
+   不要调 right。 */
+@media (max-width: 1100px) {
+    .hero__canvas {
+        width: clamp(240px, 32vw, 380px);
+        opacity: 0.55;
+    }
+}
+
+/* 窄屏没有横向空间并排 —— 退到文字后面当底纹 */
+@media (max-width: 860px) {
+    .hero__canvas {
+        top: 42%;
+        width: min(78vw, 420px);
+        opacity: 0.22;
+    }
 }
 
 .hero__chip {

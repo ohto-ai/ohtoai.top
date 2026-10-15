@@ -194,6 +194,174 @@
     }
 
     /* ======================================================================
+       指针驱动的效果
+       光标聚光灯 / 磁性按钮 / 作品行跟随高光
+
+       全部共用一个 rAF，插值在同一条循环里做。
+       触屏设备直接跳过 —— 没有光标，这些效果只会白白占性能。
+       ====================================================================== */
+    var finePointer =
+        window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+
+    if (finePointer && !reduced) {
+        var spot = { x: 0.5, y: 0.5, tx: 0.5, ty: 0.5 };
+        var spotRunning = false;
+        var magnets = [];
+
+        Array.prototype.forEach.call(
+            document.querySelectorAll(".btn"),
+            function (btn) {
+                magnets.push({ el: btn, on: false });
+            }
+        );
+
+        // 聚光灯：rAF 插值。追平目标就停帧，下次 mousemove 再唤醒 ——
+        // 光标静止时不该还占着一条 rAF。
+        function spotLoop() {
+            spot.x += (spot.tx - spot.x) * 0.09;
+            spot.y += (spot.ty - spot.y) * 0.09;
+
+            de.style.setProperty("--mx", (spot.x * 100).toFixed(2) + "%");
+            de.style.setProperty("--my", (spot.y * 100).toFixed(2) + "%");
+
+            if (
+                Math.abs(spot.tx - spot.x) < 0.0004 &&
+                Math.abs(spot.ty - spot.y) < 0.0004
+            ) {
+                spotRunning = false;
+                return;
+            }
+            requestAnimationFrame(spotLoop);
+        }
+
+        document.addEventListener(
+            "mousemove",
+            function (e) {
+                spot.tx = e.clientX / window.innerWidth;
+                spot.ty = e.clientY / window.innerHeight;
+                if (!spotRunning) {
+                    spotRunning = true;
+                    requestAnimationFrame(spotLoop);
+                }
+
+                // 磁性按钮：光标进入按钮外扩一圈的范围才开始"吸"。
+                // 直接写 translate，平滑交给 CSS transition —— 这里不需要
+                // rAF，光标不动时每帧写同一个值是白费。
+                //
+                // 先读完所有矩形再统一写样式：读写交错会强制同步布局
+                // （样式一写，下一次 getBoundingClientRect 就得重排整页）。
+                var boxes = magnets.map(function (m) {
+                    return m.el.getBoundingClientRect();
+                });
+
+                var next = boxes.map(function (r) {
+                    var mx = e.clientX - (r.left + r.width / 2);
+                    var my = e.clientY - (r.top + r.height / 2);
+                    var dist = Math.sqrt(mx * mx + my * my);
+                    var radius = Math.max(r.width, r.height) * 0.75 + 70;
+                    if (dist >= radius) return null;
+                    var pull = (1 - dist / radius) * 0.32;
+                    return [mx * pull, my * pull];
+                });
+
+                next.forEach(function (v, i) {
+                    var m = magnets[i];
+                    if (v) {
+                        m.el.style.translate =
+                            v[0].toFixed(1) + "px " + v[1].toFixed(1) + "px";
+                        m.on = true;
+                    } else if (m.on) {
+                        m.el.style.translate = "";
+                        m.on = false;
+                    }
+                });
+            },
+            { passive: true }
+        );
+
+        // 作品行跟随高光：记录光标在该行内的相对位置
+        Array.prototype.forEach.call(
+            document.querySelectorAll(".work-row"),
+            function (row) {
+                row.addEventListener(
+                    "mousemove",
+                    function (e) {
+                        var r = row.getBoundingClientRect();
+                        row.style.setProperty(
+                            "--rx",
+                            (((e.clientX - r.left) / r.width) * 100).toFixed(1) + "%"
+                        );
+                        row.style.setProperty(
+                            "--ry",
+                            (((e.clientY - r.top) / r.height) * 100).toFixed(1) + "%"
+                        );
+                    },
+                    { passive: true }
+                );
+            }
+        );
+
+        // 启动聚光灯，让它从初始位置平滑滑到光标处
+        spotRunning = true;
+        requestAnimationFrame(spotLoop);
+    } else {
+        // 触屏或减少动效：把按钮上可能残留的位移清掉
+        Array.prototype.forEach.call(
+            document.querySelectorAll(".btn"),
+            function (btn) {
+                btn.style.translate = "";
+            }
+        );
+    }
+
+    /* ======================================================================
+       滚动视差
+       背景、首屏文字、常驻动画以不同速度移动，产生纵深。
+       maximeheckel 用的就是这个手法（内部叫 --scene-follow-distance）。
+       ====================================================================== */
+    if (window.gsap && window.ScrollTrigger && !reduced) {
+        var wideEnough = window.matchMedia("(min-width: 861px)").matches;
+
+        if (wideEnough) {
+            // 首屏文字：随滚动缓慢上移
+            gsap.to(".hero__copy", {
+                yPercent: -14,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: ".hero",
+                    start: "top top",
+                    end: "bottom top",
+                    scrub: 0.6,
+                },
+            });
+
+            // 常驻动画：移动得更快，拉开与文字的前后关系
+            gsap.to(".hero__canvas", {
+                yPercent: -34,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: ".hero",
+                    start: "top top",
+                    end: "bottom top",
+                    scrub: 0.6,
+                },
+            });
+        }
+
+        // 背景网格整页缓慢漂移 —— 幅度很小，但整个页面因此有了"在动"的底子
+        gsap.to(".site-bg", {
+            yPercent: 6,
+            ease: "none",
+            scrollTrigger: {
+                trigger: document.documentElement,
+                start: "top top",
+                end: "bottom bottom",
+                scrub: 1.2,
+            },
+        });
+    }
+
+    /* ======================================================================
        揭示动效
        ====================================================================== */
 
