@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="dark" />
     <meta name="theme-color" content="#14151A" />
-    <title>Ohto-Ai — C++ Developer</title>
+    <title>Ohto-Ai — C++ Software Engineer</title>
     <meta name="description" content="Ohto-Ai，C++ 开发者。Make it work; Make it right; Make it fast;" />
     <meta name="author" content="Ohto-Ai" />
 
@@ -84,17 +84,27 @@
         (function () {
             var de = document.documentElement;
 
-            // 已经加载过一次就跳过加载页（按会话）
+            // js 标记表示"脚本可用，可以放心先把内容藏起来再揭示"。
+            // 它必须无条件加上 —— 曾经写成两个分支各加一个，
+            // 结果跳过加载页那条分支漏了它，导致同会话内二次访问时
+            // motion.css 里所有 html.js 开头的规则全部失效，
+            // 入场动画静默地什么都不做。
+            de.classList.add("js");
+
+            // 唯一的跳过条件：用户明确要求减少动效。
+            // 问候语轮播本身就是一段动画，对这类用户直接不播，
+            // 也省掉 1.4 秒的等待。
+            //
+            // 这里曾经还挂过一道"同会话只播一次"的 sessionStorage 门槛，
+            // 已移除 —— 本站是单页，那道门槛的实际效果只是"刷新之后
+            // 加载页不再出现"，跟预期正好相反。
             try {
-                if (sessionStorage.getItem("ohto:loaded")) {
+                if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
                     de.classList.remove("is-loading");
                     de.classList.add("is-skip-preloader");
-                } else {
-                    de.classList.add("js");
                 }
             } catch (e) {
-                // 隐私模式下 sessionStorage 可能抛异常，按首次访问处理
-                de.classList.add("js");
+                // matchMedia 不可用就按正常播放处理
             }
 
             // 兜底揭幕：无条件执行，不依赖任何外部资源
@@ -204,7 +214,7 @@
                         <img class="hero__avatar" src="assets/img/avatar.png"
                             onerror="this.src='https://github.com/Ohto-Ai.png?size=320'" alt="Ohto-Ai" width="52"
                             height="52" />
-                        <span class="eyebrow">C++ Developer</span>
+                        <span class="eyebrow">C++ Software Engineer</span>
                     </div>
 
                     <h1 class="hero__name mask-reveal" lang="en">Ohto-Ai</h1>

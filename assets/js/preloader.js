@@ -21,7 +21,10 @@
 
     var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    var MIN_DISPLAY = 600; // 最短展示，防闪烁
+    // 最短展示。六句问候按 190ms 一句轮播，一轮 1140ms —— 取值必须大于它，
+    // 否则问候语永远轮不完就被淡出盖掉了（原来 600ms，实测只能看到三四句）。
+    // 多出来的 260ms 正好让收尾的 Hello 停一下。
+    var MIN_DISPLAY = 1400;
     var MAX_DISPLAY = 3000; // 硬上限，配合内联兜底的 4000ms
     var FADE = reduced ? 0 : 250; // 内层文字淡出
     var CURTAIN = reduced ? 0 : 920; // 幕布滑出
@@ -134,11 +137,9 @@
                 if (preloader.parentNode) {
                     preloader.parentNode.removeChild(preloader);
                 }
-                try {
-                    sessionStorage.setItem("ohto:loaded", "1");
-                } catch (e) {
-                    /* 隐私模式下写不进去，下次访问再播一遍，可接受 */
-                }
+                // 这里原本会写 sessionStorage 做"同会话只播一次"的门槛，
+                // 已移除：本站是单页，那道门槛的实际效果只是"刷新后加载页
+                // 不再出现"，与预期相反。现在每次都播。
             }, CURTAIN);
         }, FADE);
     }
