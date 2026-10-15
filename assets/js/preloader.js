@@ -26,8 +26,10 @@
     // 多出来的 260ms 正好让收尾的 Hello 停一下。
     var MIN_DISPLAY = 1400;
     var MAX_DISPLAY = 3000; // 硬上限，配合内联兜底的 4000ms
-    var FADE = reduced ? 0 : 250; // 内层文字淡出
-    var CURTAIN = reduced ? 0 : 920; // 幕布滑出
+
+    // 退场时长，必须与 <head> 内联 CSS 里的 --curtain-duration 一致。
+    // 加载页上滑和内容升起是同一段动作，这里只是等它走完再清理节点。
+    var SLIDE = reduced ? 0 : 950;
 
     var start = performance.now();
     var revealed = false;
@@ -112,36 +114,31 @@
 
         if (counterEl) counterEl.textContent = "100";
 
-        // 1) 内层文字淡出
+        // 一次触发，一段动作：
+        //   · 撤掉 is-loading → 加载页整体上滑（内联 CSS 里的规则）
+        //   · 同一刻 → 内容从下方向上就位（layout.css 里的规则）
+        // 两边共用 --curtain-duration / --curtain-ease，所以是同一张纸在动。
+        // 问候语在上升过程中顺带淡出，不必等它先消失。
+        de.classList.remove("is-loading");
         preloader.setAttribute("data-leaving", "");
 
-        // 2) 幕布滑出。先解除 is-loading，主页在幕布下面显现，
-        //    这样滑出的是"揭幕"，而不是"先黑一下再出现"。
+        // 通知其余模块可以开始它们的入场动效了
+        try {
+            document.dispatchEvent(new CustomEvent("ohto:revealed"));
+        } catch (e) {
+            /* 极老浏览器没有 CustomEvent 构造器，忽略即可 */
+        }
+
+        // 等退场走完再彻底清理：把节点移出 DOM。
+        // 旧站把 z-index:999999 的全屏元素永久留在树里，
+        // 一旦 hide 没触发就会静默吞掉整页的点击。
         setTimeout(function () {
-            de.classList.remove("is-loading");
-            preloader.setAttribute("data-curtain", "");
-
-            // 通知其余模块可以开始它们的入场动效了
-            try {
-                document.dispatchEvent(new CustomEvent("ohto:revealed"));
-            } catch (e) {
-                /* 极老浏览器没有 CustomEvent 构造器，忽略即可 */
+            preloader.setAttribute("data-done", "");
+            preloader.style.display = "none";
+            if (preloader.parentNode) {
+                preloader.parentNode.removeChild(preloader);
             }
-
-            // 3) 彻底清理：把节点移出 DOM。
-            //    旧站把 z-index:999999 的全屏元素永久留在树里，
-            //    一旦 hide 没触发就会静默吞掉整页的点击。
-            setTimeout(function () {
-                preloader.setAttribute("data-done", "");
-                preloader.style.display = "none";
-                if (preloader.parentNode) {
-                    preloader.parentNode.removeChild(preloader);
-                }
-                // 这里原本会写 sessionStorage 做"同会话只播一次"的门槛，
-                // 已移除：本站是单页，那道门槛的实际效果只是"刷新后加载页
-                // 不再出现"，与预期相反。现在每次都播。
-            }, CURTAIN);
-        }, FADE);
+        }, SLIDE);
     }
 
     /* ----------------------------------------------------------------------

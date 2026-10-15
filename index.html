@@ -23,11 +23,30 @@
             color-scheme: dark;
         }
 
+        /* 揭幕的时长与缓动。
+           定义在这里而不是 tokens.css —— 因为加载页必须在外部 CSS 全部
+           加载失败时也能正常退场，否则它会永久盖住整站。
+           内容升起（layout.css）引用同一组变量，两边才不会脱节。 */
+        :root {
+            --curtain-duration: 0.95s;
+            --curtain-ease: cubic-bezier(0.7, 0, 0.3, 1);
+        }
+
         .preloader {
             position: fixed;
             inset: 0;
             z-index: 1000;
             overflow: hidden;
+            transform: translateY(0);
+            transition: transform var(--curtain-duration) var(--curtain-ease);
+        }
+
+        /* 加载页整体上滑退场。
+           内容同时从下方一个视口的高度升上来（见 layout.css），
+           两者同速同向，所以始终首尾相接，中间不会露出空隙。 */
+        html:not(.is-loading) .preloader {
+            transform: translateY(-100%);
+            pointer-events: none;
         }
 
         .preloader__band {
@@ -55,7 +74,7 @@
             visibility: hidden;
         }
 
-        /* 同一会话内的二次访问直接跳过加载页 */
+        /* 减少动效 / 二次访问时直接跳过加载页 */
         html.is-skip-preloader .preloader {
             display: none;
         }
