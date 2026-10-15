@@ -30,13 +30,20 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           LOGIN: Ohto-Ai
-          # 展示顺序即此顺序；描述一律取自 GitHub 原样
+          # 展示顺序即此顺序
           FEATURED: >-
             PostLive
             LightPaper
             NonogramGenerator
             CMakeProjectTemplate
             webhook
+          # 主页是全英文的，但这几个仓库在 GitHub 上的描述是中文。
+          # 在这里覆盖掉，格式 "仓库名=英文描述"（每行一条）。
+          # 不这么做的话，每次 Action 跑完都会把中文描述又拉回来。
+          DESC_OVERRIDES: |
+            PostLive=Client for a study live-streaming platform — a student research project
+            LightPaper=A lightweight dynamic desktop (live wallpaper) engine in C++
+            NonogramGenerator=Nonogram generator — logic puzzles that paint a bitmap
         run: |
           set -euo pipefail
 
@@ -60,9 +67,18 @@ jobs:
           # 按 FEATURED 顺序取出对应仓库
           printf '%s\n' $FEATURED | jq -R . | jq -s . > /tmp/featured.json
 
+          # DESC_OVERRIDES 转成 { "仓库名": "英文描述" }。
+          # 描述里可能自带 "="，所以按第一个 = 切分，其余部分拼回去。
+          printf '%s\n' "$DESC_OVERRIDES" \
+            | jq -R -s 'split("\n")
+                | map(select(test("=")))
+                | map(split("=") | {(.[0]): (.[1:] | join("="))})
+                | add // {}' > /tmp/overrides.json
+
           jq -n \
             --slurpfile repos /tmp/repos.json \
             --slurpfile want /tmp/featured.json \
+            --slurpfile over /tmp/overrides.json \
             --arg login "$LOGIN" \
             --arg date "$(date -u +%Y-%m-%d)" \
             --argjson total "$total" \
@@ -76,7 +92,7 @@ jobs:
                     | ($repos[0][] | select(.name == $n)) as $r
                     | {
                         name: $r.name,
-                        desc: ($r.description // ""),
+                        desc: ($over[0][$r.name] // $r.description // ""),
                         lang: ($r.language // ""),
                         stars: $r.stargazers_count,
                         year: ($r.pushed_at | split("-")[0] | tonumber)

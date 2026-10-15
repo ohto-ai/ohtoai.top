@@ -18,21 +18,21 @@ window.OhtoRepos = {
     featured: [
         {
             name: "PostLive",
-            desc: "科创项目 [学习直播平台] 的客户端",
+            desc: "Client for a study live-streaming platform — a student research project",
             lang: "C++",
             stars: 9,
             year: 2023,
         },
         {
             name: "LightPaper",
-            desc: "C++ 实现轻量级动态桌面",
+            desc: "A lightweight dynamic desktop (live wallpaper) engine in C++",
             lang: "C++",
             stars: 5,
             year: 2023,
         },
         {
             name: "NonogramGenerator",
-            desc: "Nonogram 是一种逻辑游戏，以猜谜的方式绘画位图",
+            desc: "Nonogram generator — logic puzzles that paint a bitmap",
             lang: "C++",
             stars: 4,
             year: 2023,

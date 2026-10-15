@@ -102,7 +102,7 @@
         var empty = el(
             "p",
             "work-empty",
-            "项目列表暂时不可用，请直接访问 GitHub。"
+            "Project list is unavailable right now — head to GitHub instead."
         );
         list.parentNode.insertBefore(empty, list.nextSibling);
         return;
@@ -118,12 +118,12 @@
     var countEl = document.getElementById("work-count");
     if (countEl) {
         countEl.textContent =
-            repos.length + " 个精选 · 共 " + (data.total || "?") + " 个公开仓库";
+            repos.length + " selected · " + (data.total || "?") + " public repositories";
     }
 
-    // "全部仓库"按钮带上总数
+    // "All repositories" 按钮带上总数
     var allLabel = document.getElementById("work-all-label");
     if (allLabel && data.total) {
-        allLabel.textContent = "全部 " + data.total + " 个仓库";
+        allLabel.textContent = "All " + data.total + " repositories";
     }
 })();
