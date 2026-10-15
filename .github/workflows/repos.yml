@@ -37,11 +37,6 @@ jobs:
             NonogramGenerator
             CMakeProjectTemplate
             webhook
-            raytracing
-            Family-Computer-Simulator
-            clipshare
-            liberty-syntax-ext
-            mlc
         run: |
           set -euo pipefail
 

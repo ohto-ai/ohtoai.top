@@ -90,10 +90,12 @@
     var nav = document.getElementById("site-nav");
 
     if (nav) {
+        // 哨兵放在 120px 处而不是 0：导航栏要等真正"往下滚了一段"
+        // 才滑出来。贴着 0 的话滚动 1px 它就冒头，首屏还是被切掉一截。
         var sentinel = document.createElement("div");
         sentinel.setAttribute("aria-hidden", "true");
         sentinel.style.cssText =
-            "position:absolute;top:0;left:0;width:1px;height:1px;pointer-events:none";
+            "position:absolute;top:120px;left:0;width:1px;height:1px;pointer-events:none";
         document.body.insertBefore(sentinel, document.body.firstChild);
 
         if ("IntersectionObserver" in window) {

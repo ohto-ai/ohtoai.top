@@ -113,10 +113,35 @@ main {
     z-index: var(--z-content);
 }
 
+/* --------------------------------------------------------------------------
+   滚动吸附
+   滚到某个区块附近时轻轻吸附一下，让区块顶部对齐 —— 纯自由滚动少了点节奏。
+
+   用 proximity 而不是 mandatory：mandatory 会强制每一次滚动都落在吸附点上，
+   在触控板上会非常"抢"，而且在区块比视口高的时候会让人滚不动。
+   proximity 只在停得够近时才吸，符合"吸附一下"的预期。
+
+   scroll-padding-top 把吸附点下移一个导航栏的高度，
+   否则区块顶会被固定导航压住。
+   -------------------------------------------------------------------------- */
+html {
+    scroll-snap-type: y proximity;
+    scroll-padding-top: 72px;
+}
+
 section {
     padding-block: var(--section-padding);
-    /* 锚点跳转时不会被固定导航挡住 */
-    scroll-margin-top: 88px;
+    scroll-snap-align: start;
+    /* 注意：这里不要再写 scroll-margin-top。
+       它会和 html 上的 scroll-padding-top 叠加，锚点跳转和吸附都会
+       多让出一段距离（实测多出 88px）。让 scroll-padding-top 一个变量
+       同时管住这两件事就够了。 */
+}
+
+/* 页脚不参与吸附 —— 它太矮，吸它只会让页面底部来回弹。
+   （首屏保留吸附，这样往上滚时能干净地停在完整首屏上。） */
+.site-footer {
+    scroll-snap-align: none;
 }
 
 /* 区块之间一条极淡的分隔线 —— 比空白更能划分层次 */
@@ -136,6 +161,29 @@ section + section {
     border-bottom: 1px solid transparent;
     transition: background-color 0.4s var(--ease), border-color 0.4s var(--ease),
         backdrop-filter 0.4s var(--ease);
+}
+
+/* 停在顶部时收起导航，首屏保持完全干净；往下滚才滑出来。
+   隐藏态挂在 html.js 下 —— 没有 JS 就永远显示，不会出现"导航不见了
+   又没东西能把它叫回来"的死局。
+   visibility 的过渡故意延迟到位移结束，这样滑出动画看得见，
+   同时隐藏期间链接也不会被 Tab 键聚焦到。 */
+html.js .site-nav {
+    transform: translateY(-100%);
+    opacity: 0;
+    visibility: hidden;
+    transition: transform 0.5s var(--ease), opacity 0.5s var(--ease),
+        visibility 0s linear 0.5s, background-color 0.4s var(--ease),
+        border-color 0.4s var(--ease);
+}
+
+html.js .site-nav[data-scrolled] {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+    transition: transform 0.5s var(--ease), opacity 0.5s var(--ease),
+        visibility 0s, background-color 0.4s var(--ease),
+        border-color 0.4s var(--ease);
 }
 
 .site-nav__inner {
