@@ -272,6 +272,7 @@
 .nav-panel[data-open] .nav-panel__link:nth-child(2) { transition-delay: 0.12s; }
 .nav-panel[data-open] .nav-panel__link:nth-child(3) { transition-delay: 0.18s; }
 .nav-panel[data-open] .nav-panel__link:nth-child(4) { transition-delay: 0.24s; }
+.nav-panel[data-open] .nav-panel__link:nth-child(5) { transition-delay: 0.3s; }
 
 .nav-panel__link:hover {
     color: var(--accent);

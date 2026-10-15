@@ -396,8 +396,25 @@ html.js .site-nav[data-scrolled] {
 .hero__actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.875rem;
+    gap: 0.875rem 1.25rem;
     align-items: center;
+}
+
+/* 邮箱直接摆在首屏动作区里 —— 访客不用滚到最底下就能看到联系方式。
+   样式上刻意比按钮弱：是一行可选的联系方式，不是第三个 CTA。 */
+.hero__email {
+    font-family: var(--font-mono);
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+    padding-bottom: 2px;
+    border-bottom: 1px solid transparent;
+    transition: var(--animation-fast);
+    word-break: break-all;
+}
+
+.hero__email:hover {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
 }
 
 /* --------------------------------------------------------------------------
@@ -487,29 +504,12 @@ html.js .site-nav[data-scrolled] {
     gap: 0.875rem;
 }
 
-.about__socials {
-    display: flex;
-    gap: 0.75rem;
-    margin-top: 2rem;
-}
-
-.about__social {
-    display: grid;
-    place-items: center;
-    width: 44px;
-    height: 44px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-full);
-    color: var(--text-secondary);
-    transition: var(--animation-fast);
-}
-
-.about__social:hover {
-    color: var(--text-primary);
-    border-color: var(--border-strong);
-    background: var(--surface-hover);
-    transform: translateY(-2px);
-}
+/* 这里原本是一排圆形图标按钮。
+   换成文字链接的原因：新增的 CSDN 与博客园都拿不出能用的小尺寸标记 ——
+   CSDN 的官方图形是 "csdn" 字样（24 单位宽的词标），缩到 18px 就是一团糊；
+   博客园的 favicon 是实心圆加一道弧线，看着更像 RSS。
+   与其留几个认不出来的图标，不如直接写名字，中英文都不会有歧义。
+   顺带省掉约 2.5KB 的内联 SVG 路径。 */
 
 /* --------------------------------------------------------------------------
    联系
