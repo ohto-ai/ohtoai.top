@@ -504,12 +504,30 @@ html.js .site-nav[data-scrolled] {
     gap: 0.875rem;
 }
 
-/* 这里原本是一排圆形图标按钮。
-   换成文字链接的原因：新增的 CSDN 与博客园都拿不出能用的小尺寸标记 ——
-   CSDN 的官方图形是 "csdn" 字样（24 单位宽的词标），缩到 18px 就是一团糊；
-   博客园的 favicon 是实心圆加一道弧线，看着更像 RSS。
-   与其留几个认不出来的图标，不如直接写名字，中英文都不会有歧义。
-   顺带省掉约 2.5KB 的内联 SVG 路径。 */
+.about__socials {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+.about__social {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+    color: var(--text-secondary);
+    transition: var(--animation-fast);
+}
+
+.about__social:hover {
+    color: var(--text-primary);
+    border-color: var(--border-strong);
+    background: var(--surface-hover);
+    transform: translateY(-2px);
+}
 
 /* --------------------------------------------------------------------------
    联系
