@@ -222,6 +222,164 @@
     font-size: var(--fs-small);
 }
 
+/* --------------------------------------------------------------------------
+   作品卡片网格（错落有致）
+
+   12 栅格里按 7/5 交替跨列，同时让图片的宽高比逐张变化，
+   于是每张卡片高度不同、上下边缘参差 —— 这就是"错落"的来源。
+   align-items: start 是关键：不加的话同一行的卡片会被拉成等高，
+   参差感就没了。
+
+   尺寸全部由 nth-child 决定，数据里不用写布局字段。
+   -------------------------------------------------------------------------- */
+.work-grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: clamp(1.5rem, 3vw, 2.75rem) clamp(1.25rem, 2.5vw, 2rem);
+    align-items: start;
+}
+
+.work-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+    grid-column: span 6;
+    transition: var(--animation-fast);
+}
+
+/* 一行三张，跨列 5 / 4 / 3，下一行镜像成 3 / 4 / 5 —— 每行都刚好占满 12 栅格。
+   早先试过 7/5 两列：在 1440px 下宽卡有 700px，配 16:10 就是 430px 高，
+   一屏放不下两张，整个区块被拉得极长。5/4/3 才是能看的密度。 */
+.work-card:nth-child(6n + 1) { grid-column: span 5; }
+.work-card:nth-child(6n + 2) { grid-column: span 4; }
+.work-card:nth-child(6n + 3) { grid-column: span 3; }
+.work-card:nth-child(6n + 4) { grid-column: span 3; }
+.work-card:nth-child(6n + 5) { grid-column: span 4; }
+.work-card:nth-child(6n + 6) { grid-column: span 5; }
+
+/* 图片区。有截图就显示截图，没有就显示占位块。 */
+.work-card__shot {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    aspect-ratio: 16 / 10;
+    transition: border-color 0.45s var(--ease), transform 0.55s var(--ease);
+}
+
+/* 宽高比跟着跨列宽度反向走：宽卡用扁比例、窄卡用竖比例，
+   这样同一行三张的高度才拉得开，形成错落；顺带每行总高也比较接近。 */
+.work-card:nth-child(6n + 1) .work-card__shot { aspect-ratio: 16 / 10; }
+.work-card:nth-child(6n + 2) .work-card__shot { aspect-ratio: 1 / 1; }
+.work-card:nth-child(6n + 3) .work-card__shot { aspect-ratio: 4 / 5; }
+.work-card:nth-child(6n + 4) .work-card__shot { aspect-ratio: 4 / 5; }
+.work-card:nth-child(6n + 5) .work-card__shot { aspect-ratio: 1 / 1; }
+.work-card:nth-child(6n + 6) .work-card__shot { aspect-ratio: 16 / 10; }
+
+.work-card__shot img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.7s var(--ease-out-expo);
+}
+
+/* 占位块：用语言色淡淡铺一层，再叠一层和全站同款的蓝图网格。
+   刻意做得像"设计过的空位"，而不是坏掉的图片。
+   换上真实截图后这一层会被 <img> 盖住。 */
+.work-card__shot--ph::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--lang, var(--text-muted));
+    opacity: 0.13;
+}
+
+.work-card__shot--ph::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: 0.5;
+    background-image:
+        repeating-linear-gradient(
+            to right,
+            oklch(97.5% 0.002 var(--base-hue) / 0.05) 0 1px,
+            transparent 1px 32px
+        ),
+        repeating-linear-gradient(
+            to bottom,
+            oklch(97.5% 0.002 var(--base-hue) / 0.05) 0 1px,
+            transparent 1px 32px
+        );
+}
+
+.work-card__ph-name {
+    position: absolute;
+    inset: auto 0 0 0;
+    padding: clamp(0.875rem, 2vw, 1.35rem);
+    font-family: var(--font-mono);
+    font-size: var(--fs-small);
+    letter-spacing: 0.02em;
+    color: var(--text-secondary);
+    z-index: 1;
+}
+
+/* 悬停：整卡微抬、图片轻推、边框转亮 */
+.work-card:hover .work-card__shot,
+.work-card:focus-within .work-card__shot {
+    border-color: var(--border-strong);
+    transform: translateY(-4px);
+}
+
+.work-card:hover .work-card__shot img,
+.work-card:focus-within .work-card__shot img {
+    transform: scale(1.04);
+}
+
+/* 文字区 */
+.work-card__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.work-card__title {
+    font-size: var(--fs-h3);
+    letter-spacing: var(--ls-h3);
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.work-card__tag {
+    flex-shrink: 0;
+    font-family: var(--font-mono);
+    font-size: var(--fs-eyebrow);
+    letter-spacing: var(--ls-eyebrow);
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 0.25rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+}
+
+.work-card__desc {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+    line-height: 1.55;
+}
+
+.work-card__foot {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: auto;
+    padding-top: 0.25rem;
+    font-family: var(--font-mono);
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+}
+
 .work-more {
     display: flex;
     justify-content: center;
@@ -394,7 +552,43 @@
 /* --------------------------------------------------------------------------
    响应式
    -------------------------------------------------------------------------- */
+/* 中等宽度：三列太挤，退成两列，保留一宽一窄的参差 */
+@media (max-width: 1080px) {
+    .work-card:nth-child(6n + 1),
+    .work-card:nth-child(6n + 3),
+    .work-card:nth-child(6n + 5) { grid-column: span 7; }
+
+    .work-card:nth-child(6n + 2),
+    .work-card:nth-child(6n + 4),
+    .work-card:nth-child(6n + 6) { grid-column: span 5; }
+
+    .work-card:nth-child(6n + 2) .work-card__shot,
+    .work-card:nth-child(6n + 3) .work-card__shot { aspect-ratio: 1 / 1; }
+}
+
 @media (max-width: 640px) {
+    /* 单列：错落没有意义，统一比例 */
+    .work-card,
+    .work-card:nth-child(6n + 1),
+    .work-card:nth-child(6n + 2),
+    .work-card:nth-child(6n + 3),
+    .work-card:nth-child(6n + 4),
+    .work-card:nth-child(6n + 5),
+    .work-card:nth-child(6n + 6) {
+        grid-column: span 12;
+    }
+
+    .work-card .work-card__shot,
+    .work-card:nth-child(6n + 1) .work-card__shot,
+    .work-card:nth-child(6n + 2) .work-card__shot,
+    .work-card:nth-child(6n + 3) .work-card__shot,
+    .work-card:nth-child(6n + 4) .work-card__shot,
+    .work-card:nth-child(6n + 5) .work-card__shot,
+    .work-card:nth-child(6n + 6) .work-card__shot {
+        aspect-ratio: 16 / 10;
+    }
+
+    /* 无 JS 降级列表在窄屏的排布 */
     .work-row {
         grid-template-columns: auto minmax(0, 1fr);
         row-gap: 0.5rem;

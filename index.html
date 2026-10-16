@@ -248,15 +248,20 @@
 
                     <h1 class="hero__name mask-reveal" lang="en">Ohto-Ai</h1>
 
+                    <!-- 一句"我做什么"。之前首屏只有名字和宣言，访客看不出这人具体做哪一行。 -->
+                    <p class="hero__lede mask-reveal" lang="en" style="--reveal-delay:.08s">
+                        I build low-level tools, cross-platform utilities, and Minecraft plugins.
+                    </p>
+
                     <!-- 三行一组，每行各自遮罩揭示。刻意断成三行而不是让它自然折行：
                          一行 42 个字符在这个字号下必然断得难看，断成三行反而像一句宣言。 -->
                     <p class="hero__statement">
-                        <span class="mask-reveal" style="--reveal-delay:.1s">Make it work;</span>
-                        <span class="mask-reveal" style="--reveal-delay:.22s">Make it right;</span>
-                        <span class="mask-reveal" style="--reveal-delay:.34s">Make it fast;</span>
+                        <span class="mask-reveal" style="--reveal-delay:.2s">Make it work;</span>
+                        <span class="mask-reveal" style="--reveal-delay:.3s">Make it right;</span>
+                        <span class="mask-reveal" style="--reveal-delay:.4s">Make it fast;</span>
                     </p>
 
-                    <div class="hero__actions reveal" style="--reveal-delay:.44s">
+                    <div class="hero__actions reveal" style="--reveal-delay:.52s">
                         <a class="btn btn--primary" href="#work">
                             View work
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -286,7 +291,7 @@
                     <p class="section-head__count mono" id="work-count"></p>
                 </div>
 
-                <div class="work-list reveal-stagger" id="work-list">
+                <div class="work-grid reveal-stagger" id="work-list">
                     <!-- 由 work.js 从 repos.data.js 渲染 -->
                 </div>
 
@@ -364,8 +369,13 @@
 
                 <div class="about__grid">
                     <div class="reveal">
+                        <!-- 原先这句是"I build things, get them right, then make them fast"，
+                             跟首屏那句宣言是同一个意思，等于在同一页说了两遍。
+                             换成实际信息：做什么、用什么语言、还写什么。 -->
                         <p class="about__lead">
-                            I'm <strong>Choo</strong> — I build things, get them right, then make them fast.
+                            I'm <strong>Choo</strong>. Most of what I build is C++ — systems,
+                            tooling, and cross-platform utilities — along with a steady stream
+                            of Minecraft plugins.
                         </p>
 
                         <ul class="about__facts">

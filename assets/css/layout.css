@@ -405,6 +405,18 @@ html.js .site-nav[data-scrolled] {
     margin-bottom: clamp(1.25rem, 3vh, 2rem);
 }
 
+/* 一句"我做什么"。
+   字号夹在名字（超大）和宣言（偏小）之间，作为第二层级；
+   颜色用次级白，比宣言亮一点，因为它是信息而不是修辞。 */
+.hero__lede {
+    font-size: clamp(1.0625rem, 1.7vw, 1.5rem);
+    line-height: 1.45;
+    letter-spacing: -0.005em;
+    color: var(--text-secondary);
+    max-width: 34ch;
+    margin-bottom: clamp(1.5rem, 3.5vh, 2.25rem);
+}
+
 /* 三行宣言。
    比原来的 display 字号小一档、颜色也压暗一档 —— 它的作用是托住下面那句
    大标题的重心，抢戏就本末倒置了。用 flex column 而不是写死 <br>：

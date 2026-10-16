@@ -2,18 +2,21 @@
  * work.js — 作品区渲染
  *
  * 数据来自 repos.data.js（由 GitHub Action 预生成，不走运行时 API）。
- * 每一行都是**真链接** —— 中键、右键复制链接、读屏软件、禁用 JS 全部正常。
+ * 每张卡片都是**真链接** —— 中键、右键复制链接、读屏软件、禁用 JS 全部正常。
+ *
+ * 布局（跨列宽度、图片宽高比）全部由 CSS 的 nth-child 决定，
+ * 所以数据里不需要写任何布局字段。
  */
 (function () {
     "use strict";
 
-    var list = document.getElementById("work-list");
+    var grid = document.getElementById("work-list");
     var data = window.OhtoRepos;
 
-    if (!list) return;
+    if (!grid) return;
 
     /* ----------------------------------------------------------------------
-       语言色点 —— GitHub 官方配色
+       语言色 —— GitHub 官方配色
        ---------------------------------------------------------------------- */
     var LANG_COLORS = {
         "C++": "#f34b7d",
@@ -37,58 +40,73 @@
         Vue: "#41b883",
     };
 
-    var ARROW_SVG =
-        '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" ' +
-        'stroke="currentColor" stroke-width="2" aria-hidden="true">' +
-        '<path d="M7 17L17 7M7 7h10v10"/></svg>';
-
     function el(tag, className, text) {
         var node = document.createElement(tag);
         if (className) node.className = className;
-        // 一律用 textContent —— 描述来自 GitHub，不能当 HTML 解析
+        // 一律用 textContent —— 数据来自 GitHub，不能当 HTML 解析
         if (text != null) node.textContent = text;
         return node;
     }
 
-    function buildRow(repo, index) {
+    function buildCard(repo) {
         var a = document.createElement("a");
-        a.className = "work-row";
+        a.className = "work-card";
         a.href = "https://github.com/" + (data.login || "Ohto-Ai") + "/" + repo.name;
         a.target = "_blank";
         a.rel = "noopener noreferrer";
 
-        a.appendChild(
-            el("span", "work-row__index", String(index).padStart(2, "0"))
-        );
+        var langColor = LANG_COLORS[repo.lang] || "";
+        if (langColor) a.style.setProperty("--lang", langColor);
 
-        var body = el("span", "work-row__body");
-        body.appendChild(el("span", "work-row__title", repo.name));
-
-        if (repo.desc) {
-            body.appendChild(el("span", "work-row__desc", repo.desc));
+        /* ---- 图区 ---- */
+        var shot = el("div", "work-card__shot");
+        if (repo.shot) {
+            var img = document.createElement("img");
+            img.src = repo.shot;
+            img.alt = repo.name + " screenshot";
+            img.loading = "lazy";
+            img.decoding = "async";
+            // 图片缺失时退回占位块，而不是留一个破图标
+            img.addEventListener("error", function () {
+                img.remove();
+                shot.classList.add("work-card__shot--ph");
+                shot.appendChild(el("span", "work-card__ph-name", repo.name));
+            });
+            shot.appendChild(img);
+        } else {
+            shot.classList.add("work-card__shot--ph");
+            shot.appendChild(el("span", "work-card__ph-name", repo.name));
         }
-        a.appendChild(body);
+        a.appendChild(shot);
 
-        var meta = el("span", "work-row__meta");
+        /* ---- 标题行 ---- */
+        var head = el("div", "work-card__head");
+        head.appendChild(el("h3", "work-card__title", repo.name));
+        if (repo.category) {
+            head.appendChild(el("span", "work-card__tag", repo.category));
+        }
+        a.appendChild(head);
 
+        /* ---- 描述 ---- */
+        if (repo.desc) {
+            a.appendChild(el("p", "work-card__desc", repo.desc));
+        }
+
+        /* ---- 底部元信息 ---- */
+        var foot = el("div", "work-card__foot");
         if (repo.lang) {
             var lang = el("span", "work-row__lang");
             var dot = el("span", "work-row__dot");
-            dot.style.background = LANG_COLORS[repo.lang] || "var(--text-disabled)";
+            dot.style.background = langColor || "var(--text-disabled)";
             lang.appendChild(dot);
             lang.appendChild(document.createTextNode(repo.lang));
-            meta.appendChild(lang);
+            foot.appendChild(lang);
         }
-
         if (repo.stars > 0) {
-            meta.appendChild(el("span", "work-row__stars", "★ " + repo.stars));
+            foot.appendChild(el("span", "work-row__stars", "★ " + repo.stars));
         }
+        a.appendChild(foot);
 
-        var arrow = el("span", "work-row__arrow");
-        arrow.innerHTML = ARROW_SVG;
-        meta.appendChild(arrow);
-
-        a.appendChild(meta);
         return a;
     }
 
@@ -104,21 +122,24 @@
             "work-empty",
             "Project list is unavailable right now — head to GitHub instead."
         );
-        list.parentNode.insertBefore(empty, list.nextSibling);
+        grid.parentNode.insertBefore(empty, grid.nextSibling);
         return;
     }
 
     var frag = document.createDocumentFragment();
-    repos.forEach(function (repo, i) {
-        frag.appendChild(buildRow(repo, i));
+    repos.forEach(function (repo) {
+        frag.appendChild(buildCard(repo));
     });
-    list.appendChild(frag);
+    grid.appendChild(frag);
 
-    // 行数统计
+    // 数量统计
     var countEl = document.getElementById("work-count");
     if (countEl) {
         countEl.textContent =
-            repos.length + " selected · " + (data.total || "?") + " public repositories";
+            repos.length +
+            " selected · " +
+            (data.total || "?") +
+            " public repositories";
     }
 
     // "All repositories" 按钮带上总数
