@@ -317,25 +317,83 @@ html.js .site-nav[data-scrolled] {
     min-height: 100svh;
     padding-block: clamp(7rem, 16vh, 11rem) var(--section-padding);
     border-top: none;
+    /* 立绘跟随光标倾斜时，旋转会撑大它的包围盒。transform 和普通布局
+       一样计入可滚动区域，不夹住的话会冒出一条横向滚动条。
+       夹在首屏范围内即可 —— 这里没有任何元素需要溢出到外面。 */
+    overflow: clip;
 }
 
 .hero .container {
     position: relative;
 }
 
-/* 常驻动画：一个缓慢自转的线框二十面体。
-   画在 canvas 上而不是上 WebGL —— 同样能做出"发光的工程结构"观感，
-   但零依赖、约 5KB，也不需要为它再引一个 600KB 的 three.js。
-   放在首屏右半边那片空白里，正好补上版面重心。 */
-.hero__canvas {
+/* 常驻动画：大户爱的立绘。
+   放在首屏右半边那片空白里，补上版面重心。
+   动效走整体位移（浮动 / 跟随光标倾角 / 星光闪烁），不做分层动画 ——
+   原因见 index.html 那段注释。 */
+.hero__char {
     position: absolute;
     top: 50%;
     right: 0;
     translate: 0 -50%;
-    width: clamp(300px, 36vw, 560px);
-    aspect-ratio: 1;
+    width: clamp(300px, 38vw, 580px);
+    aspect-ratio: 1015 / 963;
     z-index: 0;
     pointer-events: none;
+    /* 跟随光标的倾角加在这一层 */
+    transform-origin: 50% 78%;   /* 以"脖子"附近为轴，转动才自然 */
+}
+
+/* 背后的柔光：让角色从深底上浮起来，而不是硬贴上去。
+
+   注意 inset 必须是 0，不能用负值向外扩 —— 绝对定位元素同样计入
+   可滚动区域，之前写 inset: -14% 直接把页面撑宽（1440px 下溢出 99px）。
+   渐变本身在 70% 处就淡完了，留在盒内完全够用。 */
+.hero__char-glow {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 52% 52% at 50% 48%,
+            oklch(54.5% 0.203 var(--base-hue) / 0.22) 0%, transparent 72%);
+    pointer-events: none;
+}
+
+.hero__char-img {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    /* 上下浮动 */
+    animation: char-float 7s var(--ease) infinite alternate;
+}
+
+@keyframes char-float {
+    from { transform: translateY(-8px); }
+    to   { transform: translateY(10px); }
+}
+
+/* 眼睛上的星光。位置由 --sx/--sy 给（原图里的归一化坐标），
+   正好落在她瞳孔里那两颗星上，闪烁时像是在眨眼。 */
+.hero__spark {
+    position: absolute;
+    left: var(--sx);
+    top: var(--sy);
+    width: 7%;
+    aspect-ratio: 1;
+    translate: -50% -50%;
+    background: currentColor;
+    clip-path: polygon(50% 0%, 58% 42%, 100% 50%, 58% 58%,
+                       50% 100%, 42% 58%, 0% 50%, 42% 42%);
+    color: #fff;
+    opacity: 0;
+    animation: spark-twinkle 5.2s var(--ease) infinite;
+}
+
+.hero__spark--late { animation-delay: 2.6s; }
+
+@keyframes spark-twinkle {
+    0%, 62%, 100% { opacity: 0; transform: scale(0.4) rotate(0deg); }
+    72%           { opacity: 1; transform: scale(1) rotate(45deg); }
+    84%           { opacity: 0.5; transform: scale(0.8) rotate(80deg); }
 }
 
 /* 文字压在动画之上 */
@@ -350,19 +408,30 @@ html.js .site-nav[data-scrolled] {
    documentElement.scrollWidth 会大于视口宽。想让它更靠边就调宽度，
    不要调 right。 */
 @media (max-width: 1100px) {
-    .hero__canvas {
-        width: clamp(240px, 32vw, 380px);
-        opacity: 0.55;
+    .hero__char {
+        width: clamp(260px, 34vw, 420px);
+        opacity: 0.75;
     }
 }
 
 /* 窄屏没有横向空间并排 —— 退到文字后面当底纹 */
+/* 窄屏：文字占满宽度，立绘退成背景质感。
+   透明度压到 0.16、位置上移 —— 30% 时它正压在正文和宣言那几行下面，
+   字读起来发糊。 */
 @media (max-width: 860px) {
-    .hero__canvas {
-        top: 42%;
-        width: min(78vw, 420px);
-        opacity: 0.22;
+    .hero__char {
+        top: 26%;
+        /* 同样不能用负的 right —— 会撑宽页面 */
+        right: 0;
+        width: min(64vw, 320px);
+        opacity: 0.16;
     }
+}
+
+/* 减少动效：浮动和闪烁都停掉 */
+@media (prefers-reduced-motion: reduce) {
+    .hero__char-img { animation: none; }
+    .hero__spark { display: none; }
 }
 
 .hero__chip {

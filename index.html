@@ -100,6 +100,8 @@
     <link rel="stylesheet" href="assets/css/motion.css" />
 
     <link rel="icon" href="favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" href="assets/icon/favicon-256.png" sizes="256x256" />
+    <link rel="apple-touch-icon" href="assets/icon/apple-touch-icon.png" />
 
     <!-- ======================================================================
          内联兜底
@@ -235,8 +237,17 @@
              ================================================================== -->
         <section class="hero" id="top">
             <div class="container">
-                <!-- 常驻动画：缓慢自转的线框结构，由 hero-canvas.js 绘制 -->
-                <canvas class="hero__canvas" id="hero-canvas" aria-hidden="true"></canvas>
+                <!-- 常驻动画：立绘 + 眼睛上的星光闪烁。
+                     眨眼做不了 —— 睑线和盖住右眼的刘海颜色完全一样（都是深蓝紫），
+                     按颜色分不开，抹除必然误伤一边，需要的其实是分层原始素材。 -->
+                <div class="hero__char" id="hero-char" aria-hidden="true">
+                    <div class="hero__char-glow"></div>
+                    <img class="hero__char-img" src="assets/img/ohtoai.png" alt=""
+                        width="1015" height="963" decoding="async" />
+                    <!-- 星光落在原图眼睛的高光位置（归一化坐标） -->
+                    <span class="hero__spark" style="--sx:36.2%;--sy:67.6%"></span>
+                    <span class="hero__spark hero__spark--late" style="--sx:63.8%;--sy:68.9%"></span>
+                </div>
 
                 <div class="hero__copy">
                     <div class="hero__chip reveal">
@@ -479,7 +490,6 @@
     <script src="assets/js/vendor/ScrollTrigger.min.js"></script>
     <script src="assets/js/vendor/lenis.min.js"></script>
     <script src="assets/js/preloader.js"></script>
-    <script src="assets/js/hero-canvas.js"></script>
     <script src="assets/js/work.js"></script>
     <script src="assets/js/site.js"></script>
     <script src="assets/js/log-website.js"></script>
