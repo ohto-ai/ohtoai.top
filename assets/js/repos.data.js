@@ -4,7 +4,7 @@
  * 本文件由 .github/workflows/repos.yml 自动生成，请勿手工编辑。
  * 页面把它当普通本地脚本加载，不在运行时调 GitHub API。
  *
- * @generated 2026-10-16T01:36:48Z
+ * @generated 2026-10-16T01:51:13Z
  */
 window.OhtoRepos = {
   "generated": "2026-10-16",
@@ -34,7 +34,7 @@ window.OhtoRepos = {
     },
     {
       "name": "picbed",
-      "desc": "图床, 但是不(完全)需要服务器后台.",
+      "desc": "A serverless image hosting solution built entirely on Cloudflare's free tier — R2 for storage, D1 for metadata, Workers for logic, and a pure static frontend.",
       "lang": "HTML",
       "stars": 0,
       "year": 2026
@@ -55,7 +55,7 @@ window.OhtoRepos = {
     },
     {
       "name": "OpShop",
-      "desc": "",
+      "desc": "A multi-currency virtual shop plugin for Paper Minecraft servers.",
       "lang": "Java",
       "stars": 0,
       "year": 2026
@@ -69,7 +69,7 @@ window.OhtoRepos = {
     },
     {
       "name": "MobEditor",
-      "desc": "Minecraft plugin",
+      "desc": "A Minecraft plugin for editing mobs, written in Kotlin with Gradle.",
       "lang": "Java",
       "stars": 0,
       "year": 2026
