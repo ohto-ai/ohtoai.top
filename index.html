@@ -237,16 +237,20 @@
              ================================================================== -->
         <section class="hero" id="top">
             <div class="container">
-                <!-- 常驻动画：立绘 + 眼睛上的星光闪烁。
-                     眨眼做不了 —— 睑线和盖住右眼的刘海颜色完全一样（都是深蓝紫），
-                     按颜色分不开，抹除必然误伤一边，需要的其实是分层原始素材。 -->
+                <!-- 常驻动画：大户爱，四帧切换 + 平滑跟随。
+                     走「预渲染多帧」而不是分层动画 —— 眼睛的睑线和盖住右眼的
+                     刘海颜色完全一样（都是深蓝紫），按颜色分不开，
+                     分层抹除必然误伤一边。换帧就没这个问题。
+                     只有 normal 写在 HTML 里，另外三帧由 JS 在主内容就绪后加载。 -->
                 <div class="hero__char" id="hero-char" aria-hidden="true">
                     <div class="hero__char-glow"></div>
-                    <img class="hero__char-img" src="assets/img/ohtoai.png" alt=""
-                        width="1015" height="963" decoding="async" />
-                    <!-- 星光落在原图眼睛的高光位置（归一化坐标） -->
-                    <span class="hero__spark" style="--sx:36.2%;--sy:67.6%"></span>
-                    <span class="hero__spark hero__spark--late" style="--sx:63.8%;--sy:68.9%"></span>
+                    <div class="hero__char-stage" id="hero-stage">
+                        <img class="hero__frame" data-frame="normal" src="assets/img/face/normal.png"
+                            alt="" width="1200" height="1200" decoding="async" />
+                        <img class="hero__frame" data-frame="left" alt="" width="1200" height="1200" />
+                        <img class="hero__frame" data-frame="right" alt="" width="1200" height="1200" />
+                        <img class="hero__frame" data-frame="blink" alt="" width="1200" height="1200" />
+                    </div>
                 </div>
 
                 <div class="hero__copy">
@@ -490,6 +494,7 @@
     <script src="assets/js/vendor/ScrollTrigger.min.js"></script>
     <script src="assets/js/vendor/lenis.min.js"></script>
     <script src="assets/js/preloader.js"></script>
+    <script src="assets/js/hero-char.js"></script>
     <script src="assets/js/work.js"></script>
     <script src="assets/js/site.js"></script>
     <script src="assets/js/log-website.js"></script>

@@ -335,12 +335,16 @@ html.js .site-nav[data-scrolled] {
     position: absolute;
     top: 50%;
     right: 0;
-    translate: 0 -50%;
     width: clamp(300px, 38vw, 580px);
-    aspect-ratio: 1015 / 963;
+    aspect-ratio: 1;             /* 帧图是 1200×1200 正方形 */
+    /* 垂直居中用负 margin，不用 translate: 0 -50%。
+       实测 translate 那版在这台机器上没进 getBoundingClientRect ——
+       computed 值明明写着 "0px -50%"，元素却停在下方被视口切掉。
+       负 margin 的行为没有歧义。 */
+    margin-top: calc(clamp(300px, 38vw, 580px) / -2);
     z-index: 0;
     pointer-events: none;
-    /* 跟随光标的倾角加在这一层 */
+    /* 跟随光标的倾角加在 stage 层；这里只管呼吸和定位 */
     transform-origin: 50% 78%;   /* 以"脖子"附近为轴，转动才自然 */
 }
 
@@ -357,43 +361,39 @@ html.js .site-nav[data-scrolled] {
     pointer-events: none;
 }
 
-.hero__char-img {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    /* 上下浮动 */
-    animation: char-float 7s var(--ease) infinite alternate;
+/* 呼吸。加在 .hero__char 上，和 stage 层各管一个 transform ——
+   同一元素上又做 keyframe 又用 JS 写 transform 会互相覆盖。 */
+.hero__char {
+    animation: char-float 4.5s var(--ease) infinite alternate;
 }
 
 @keyframes char-float {
-    from { transform: translateY(-8px); }
-    to   { transform: translateY(10px); }
+    from { transform: translateY(-7px); }
+    to   { transform: translateY(9px); }
 }
 
-/* 眼睛上的星光。位置由 --sx/--sy 给（原图里的归一化坐标），
-   正好落在她瞳孔里那两颗星上，闪烁时像是在眨眼。 */
-.hero__spark {
+/* 跟随光标平移 + 倾斜加在这一层（由 JS 写 transform） */
+.hero__char-stage {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    will-change: transform;
+}
+
+/* 四帧叠在同一格子里，靠 opacity 切换。
+   淡入淡出用 60ms —— 再长会糊成两双眼睛，再短就显生硬。 */
+.hero__frame {
     position: absolute;
-    left: var(--sx);
-    top: var(--sy);
-    width: 7%;
-    aspect-ratio: 1;
-    translate: -50% -50%;
-    background: currentColor;
-    clip-path: polygon(50% 0%, 58% 42%, 100% 50%, 58% 58%,
-                       50% 100%, 42% 58%, 0% 50%, 42% 42%);
-    color: #fff;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
     opacity: 0;
-    animation: spark-twinkle 5.2s var(--ease) infinite;
+    transition: opacity 0.06s linear;
 }
 
-.hero__spark--late { animation-delay: 2.6s; }
-
-@keyframes spark-twinkle {
-    0%, 62%, 100% { opacity: 0; transform: scale(0.4) rotate(0deg); }
-    72%           { opacity: 1; transform: scale(1) rotate(45deg); }
-    84%           { opacity: 0.5; transform: scale(0.8) rotate(80deg); }
+.hero__frame[data-on] {
+    opacity: 1;
 }
 
 /* 文字压在动画之上 */
@@ -428,10 +428,9 @@ html.js .site-nav[data-scrolled] {
     }
 }
 
-/* 减少动效：浮动和闪烁都停掉 */
+/* 减少动效：呼吸与跟随都停掉，只留一张静态立绘 */
 @media (prefers-reduced-motion: reduce) {
-    .hero__char-img { animation: none; }
-    .hero__spark { display: none; }
+    .hero__char { animation: none; }
 }
 
 .hero__chip {

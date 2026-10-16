@@ -278,12 +278,8 @@
 
         // 聚光灯：rAF 插值。追平目标就停帧，下次 mousemove 再唤醒 ——
         // 光标静止时不该还占着一条 rAF。
-        // 立绘跟随光标轻微倾斜。走 CSS 的 rotate 属性，不用 transform ——
-        // transform 已经被 GSAP 的视差占着（yPercent），写进去会互相覆盖。
-        // rotate / translate / transform 是三个独立属性，会叠加。
-        var charEl = document.getElementById("hero-char");
-        var charRot = 0;
-
+        // 立绘的跟随/眨眼挪到了 hero-char.js —— 那是换帧动画，
+        // 和这里的指针效果不是一回事，混在一起只会互相干扰。
         function spotLoop() {
             spot.x += (spot.tx - spot.x) * 0.09;
             spot.y += (spot.ty - spot.y) * 0.09;
@@ -291,19 +287,9 @@
             de.style.setProperty("--mx", (spot.x * 100).toFixed(2) + "%");
             de.style.setProperty("--my", (spot.y * 100).toFixed(2) + "%");
 
-            // 倾角必须相对视口中心算（spot.x 的范围是 0..1，中心 0.5）。
-            // 直接拿 spot.x 当角度的话，静止时就带着 1.75° 的歪斜 ——
-            // 而旋转会撑大包围盒，实测把页面顶宽了 20px。
-            var wantRot = charEl ? (spot.x - 0.5) * 7 : 0;   // ±3.5°
-            if (charEl) {
-                charRot += (wantRot - charRot) * 0.07;
-                charEl.style.rotate = charRot.toFixed(2) + "deg";
-            }
-
             if (
                 Math.abs(spot.tx - spot.x) < 0.0004 &&
-                Math.abs(spot.ty - spot.y) < 0.0004 &&
-                Math.abs(charRot - wantRot) < 0.01
+                Math.abs(spot.ty - spot.y) < 0.0004
             ) {
                 spotRunning = false;
                 return;
