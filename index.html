@@ -243,6 +243,11 @@
                      分层抹除必然误伤一边。换帧就没这个问题。
                      只有 normal 写在 HTML 里，另外三帧由 JS 在主内容就绪后加载。 -->
                 <div class="hero__char" id="hero-char" aria-hidden="true">
+                    <!-- 旧版首屏那个自转的线框二十面体，现在退到立绘背后当底衬。
+                         比角色大一圈，只在她的轮廓之外露出来。 -->
+                    <div class="hero__backdrop">
+                        <canvas id="hero-canvas"></canvas>
+                    </div>
                     <div class="hero__char-glow"></div>
                     <div class="hero__char-stage" id="hero-stage">
                         <img class="hero__frame" data-frame="normal" src="assets/img/face/normal.png"
@@ -495,6 +500,7 @@
     <script src="assets/js/vendor/lenis.min.js"></script>
     <script src="assets/js/preloader.js"></script>
     <script src="assets/js/hero-char.js"></script>
+    <script src="assets/js/hero-canvas.js"></script>
     <script src="assets/js/work.js"></script>
     <script src="assets/js/site.js"></script>
     <script src="assets/js/log-website.js"></script>
