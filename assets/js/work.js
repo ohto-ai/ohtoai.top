@@ -58,7 +58,7 @@
         a.rel = "noopener noreferrer";
 
         a.appendChild(
-            el("span", "work-row__index", String(index + 1).padStart(2, "0"))
+            el("span", "work-row__index", String(index).padStart(2, "0"))
         );
 
         var body = el("span", "work-row__body");
