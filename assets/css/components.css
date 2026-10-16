@@ -337,13 +337,6 @@
 }
 
 /* 文字区 */
-.work-card__head {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 1rem;
-}
-
 .work-card__title {
     font-size: var(--fs-h3);
     letter-spacing: var(--ls-h3);
@@ -351,16 +344,29 @@
     color: var(--text-primary);
 }
 
+/* GitHub topics。它们本来就是小写连字符，不做 uppercase ——
+   "CLOUDFLARE-WORKERS" 读起来比 "cloudflare-workers" 费劲。 */
+.work-card__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+}
+
 .work-card__tag {
-    flex-shrink: 0;
     font-family: var(--font-mono);
     font-size: var(--fs-eyebrow);
-    letter-spacing: var(--ls-eyebrow);
-    text-transform: uppercase;
+    letter-spacing: 0.02em;
     color: var(--text-muted);
-    padding: 0.25rem 0.6rem;
+    padding: 0.2rem 0.55rem;
     border: 1px solid var(--border);
     border-radius: var(--radius-full);
+    transition: color 0.3s var(--ease), border-color 0.3s var(--ease);
+}
+
+.work-card:hover .work-card__tag,
+.work-card:focus-within .work-card__tag {
+    color: var(--text-secondary);
+    border-color: var(--border-strong);
 }
 
 .work-card__desc {

@@ -44,21 +44,11 @@ jobs:
             illegal-scanner
             SkullShop
             no-hide-flags
-          # 领域标签，显示在卡片标题右侧。格式 "仓库名=标签"（每行一条）。
-          # 刻意用领域而不是语言 —— 卡片底部已经显示了语言，标签再说一遍没信息量。
-          CATEGORIES: |
-            PostLive=Desktop
-            LightPaper=Desktop
-            NonogramGenerator=Graphics
-            picbed=Web
-            webhook=Systems
-            client-tools=Minecraft
-            OpShop=Minecraft
-            auto-craft=Minecraft
-            MobEditor=Minecraft
-            illegal-scanner=Minecraft
-            SkullShop=Minecraft
-            no-hide-flags=Minecraft
+          # 卡片上的标签直接取各仓库在 GitHub 上的 topics，不在这里手工维护。
+          # 想改标签就去 GitHub 仓库页面右上角改，下次跑本 workflow 自动同步。
+          # 注意：仓库没设 topics 的话就没有标签（目前 illegal-scanner 和
+          # SkullShop 是空的）。
+          #
           # 主页是全英文的，但这几个仓库在 GitHub 上的描述是中文。
           # 在这里覆盖掉，格式 "仓库名=英文描述"（每行一条）。
           # 不这么做的话，每次 Action 跑完都会把中文描述又拉回来。
@@ -99,13 +89,6 @@ jobs:
                 | map(split("=") | {(.[0]): (.[1:] | join("="))})
                 | add // {}' > /tmp/overrides.json
 
-          # CATEGORIES 同理，转成 { "仓库名": "标签" }
-          printf '%s\n' "$CATEGORIES" \
-            | jq -R -s 'split("\n")
-                | map(select(test("=")))
-                | map(split("=") | {(.[0]): (.[1:] | join("="))})
-                | add // {}' > /tmp/categories.json
-
           # 截图：在 assets/work/ 下找 <仓库名>.<扩展名>。
           # 只要把图按仓库名命名丢进那个目录，下次跑 Action 就会自动接上，
           # 不需要改这个 workflow。找不到就留空，页面会渲染占位块。
@@ -125,7 +108,6 @@ jobs:
             --slurpfile repos /tmp/repos.json \
             --slurpfile want /tmp/featured.json \
             --slurpfile over /tmp/overrides.json \
-            --slurpfile cats /tmp/categories.json \
             --slurpfile shots /tmp/shots.json \
             --arg login "$LOGIN" \
             --arg date "$(date -u +%Y-%m-%d)" \
@@ -144,7 +126,17 @@ jobs:
                         lang: ($r.language // ""),
                         stars: $r.stargazers_count,
                         year: ($r.pushed_at | split("-")[0] | tonumber),
-                        category: ($cats[0][$r.name] // ""),
+                        # 标签直接用仓库自己设的 topics。
+                        # 滤掉和语言完全同名的那一个（CMake 仓库挂 "cmake"、
+                        # Java 仓库挂 "java"），否则卡片上和底部的语言重复。
+                        # C++ 的情况单独处理一下："cpp" / "c" 也一并滤掉。
+                        topics: (
+                          ($r.language // "" | ascii_downcase) as $l
+                          | [ ($r.topics // [])[]
+                              | select(. != $l)
+                              | select((($l == "c++") and (. == "cpp" or . == "c")) | not)
+                            ]
+                        ),
                         shot: ($shots[0][$r.name] // "")
                       }
                   ]

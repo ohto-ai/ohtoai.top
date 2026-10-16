@@ -40,6 +40,9 @@
         Vue: "#41b883",
     };
 
+    // 每张卡最多显示几个 topic
+    var MAX_TAGS = 3;
+
     function el(tag, className, text) {
         var node = document.createElement(tag);
         if (className) node.className = className;
@@ -79,13 +82,21 @@
         }
         a.appendChild(shot);
 
-        /* ---- 标题行 ---- */
-        var head = el("div", "work-card__head");
-        head.appendChild(el("h3", "work-card__title", repo.name));
-        if (repo.category) {
-            head.appendChild(el("span", "work-card__tag", repo.category));
+        /* ---- 标题 ---- */
+        a.appendChild(el("h3", "work-card__title", repo.name));
+
+        /* ---- 标签：直接取 GitHub 上该仓库的 topics ----
+           超过 MAX_TAGS 就不再显示 —— client-tools 那种挂了 5 个的，
+           而且 mc / minecraft / minecraft-mod 三个说的是同一件事。
+           topics 在 GitHub 上本来就是小写连字符，原样显示即可。 */
+        var topics = Array.isArray(repo.topics) ? repo.topics : [];
+        if (topics.length) {
+            var tagList = el("ul", "work-card__tags");
+            topics.slice(0, MAX_TAGS).forEach(function (t) {
+                tagList.appendChild(el("li", "work-card__tag", t));
+            });
+            a.appendChild(tagList);
         }
-        a.appendChild(head);
 
         /* ---- 描述 ---- */
         if (repo.desc) {

@@ -4,7 +4,7 @@
  * 本文件由 .github/workflows/repos.yml 自动生成，请勿手工编辑。
  * 页面把它当普通本地脚本加载，不在运行时调 GitHub API。
  *
- * @generated 2026-10-16T01:51:13Z
+ * @generated 2026-10-16T15:59:07Z
  */
 window.OhtoRepos = {
   "generated": "2026-10-16",
@@ -17,7 +17,12 @@ window.OhtoRepos = {
       "lang": "C++",
       "stars": 9,
       "year": 2024,
-      "category": "Desktop",
+      "topics": [
+        "client",
+        "live",
+        "qt",
+        "sql"
+      ],
       "shot": ""
     },
     {
@@ -26,7 +31,11 @@ window.OhtoRepos = {
       "lang": "C++",
       "stars": 5,
       "year": 2023,
-      "category": "Desktop",
+      "topics": [
+        "qt",
+        "wallpaper",
+        "wallpaper-engine"
+      ],
       "shot": ""
     },
     {
@@ -35,7 +44,10 @@ window.OhtoRepos = {
       "lang": "C++",
       "stars": 4,
       "year": 2020,
-      "category": "Graphics",
+      "topics": [
+        "easyx",
+        "nonogram"
+      ],
       "shot": ""
     },
     {
@@ -44,7 +56,11 @@ window.OhtoRepos = {
       "lang": "HTML",
       "stars": 0,
       "year": 2026,
-      "category": "Web",
+      "topics": [
+        "cloudflare-workers",
+        "picbed",
+        "static-website"
+      ],
       "shot": ""
     },
     {
@@ -53,7 +69,10 @@ window.OhtoRepos = {
       "lang": "C++",
       "stars": 3,
       "year": 2026,
-      "category": "Systems",
+      "topics": [
+        "cpp17",
+        "webhook"
+      ],
       "shot": ""
     },
     {
@@ -62,7 +81,13 @@ window.OhtoRepos = {
       "lang": "Java",
       "stars": 1,
       "year": 2026,
-      "category": "Minecraft",
+      "topics": [
+        "client-mod",
+        "fabric-mod",
+        "mc",
+        "minecraft",
+        "minecraft-mod"
+      ],
       "shot": ""
     },
     {
@@ -71,7 +96,11 @@ window.OhtoRepos = {
       "lang": "Java",
       "stars": 0,
       "year": 2026,
-      "category": "Minecraft",
+      "topics": [
+        "mc-plugin",
+        "mc-server",
+        "shop"
+      ],
       "shot": ""
     },
     {
@@ -80,7 +109,9 @@ window.OhtoRepos = {
       "lang": "Java",
       "stars": 0,
       "year": 2026,
-      "category": "Minecraft",
+      "topics": [
+        "mod"
+      ],
       "shot": ""
     },
     {
@@ -89,7 +120,10 @@ window.OhtoRepos = {
       "lang": "Java",
       "stars": 0,
       "year": 2026,
-      "category": "Minecraft",
+      "topics": [
+        "mc-plugin",
+        "mc-server"
+      ],
       "shot": ""
     },
     {
@@ -98,7 +132,7 @@ window.OhtoRepos = {
       "lang": "Java",
       "stars": 1,
       "year": 2026,
-      "category": "Minecraft",
+      "topics": [],
       "shot": ""
     },
     {
@@ -106,17 +140,21 @@ window.OhtoRepos = {
       "desc": "Minecraft plugin",
       "lang": "Java",
       "stars": 0,
-      "year": 2023,
-      "category": "Minecraft",
+      "year": 2026,
+      "topics": [],
       "shot": ""
     },
     {
       "name": "no-hide-flags",
-      "desc": "Reveal hidden enchantments and attributes in tooltips",
+      "desc": "Reveal Hidden Enchantments and Attributes in Tooltips",
       "lang": "Java",
       "stars": 1,
-      "year": 2023,
-      "category": "Minecraft",
+      "year": 2025,
+      "topics": [
+        "enchantments",
+        "minecraft-mod",
+        "nbt"
+      ],
       "shot": ""
     }
   ]
