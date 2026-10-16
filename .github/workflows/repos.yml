@@ -35,15 +35,17 @@ jobs:
             PostLive
             LightPaper
             NonogramGenerator
-            CMakeProjectTemplate
+            picbed
             webhook
+            client-tools
+            OpShop
+            auto-craft
+            MobEditor
+            illegal-scanner
           # 主页是全英文的，但这几个仓库在 GitHub 上的描述是中文。
           # 在这里覆盖掉，格式 "仓库名=英文描述"（每行一条）。
           # 不这么做的话，每次 Action 跑完都会把中文描述又拉回来。
-          DESC_OVERRIDES: |
-            PostLive=Client for a study live-streaming platform — a student research project
-            LightPaper=A lightweight dynamic desktop (live wallpaper) engine in C++
-            NonogramGenerator=Nonogram generator — logic puzzles that paint a bitmap
+          DESC_OVERRIDES:
         run: |
           set -euo pipefail
 
