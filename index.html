@@ -61,9 +61,19 @@
         .preloader__band:nth-child(3) { top: 66.66%; }
 
         /* 加载期间，主页内容物理上不可见、不可滚动。
-           即便遮罩层因为任何原因变透明，也不可能露出主页。 */
+           即便遮罩层因为任何原因变透明，也不可能露出主页。
+
+           用 clip 而不是 hidden：hidden 仍允许程序化滚动（比如方向键、
+           空格），clip 则完全不建立可滚动区域。
+
+           注意：它**不能**阻止文档被撑高。内容在加载期间整体下移 100vh，
+           scrollHeight 实测会从 3369 涨到 4269（差一个视口）。原因是 body
+           的 overflow 会传播到视口、body 自身按 visible 处理，那段位移照样
+           计入可滚动区域。改用 clip 也一样撑高 —— 我试过。
+           真正兜住这件事的是 site.js：平滑滚动和 ScrollTrigger 都推迟到
+           位移动画结束后才初始化 / refresh。 */
         html.is-loading body {
-            overflow: hidden;
+            overflow: clip;
         }
 
         html.is-loading .site-nav,

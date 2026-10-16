@@ -47,22 +47,47 @@
        ====================================================================== */
     var lenis = null;
 
-    if (!reduced && typeof window.Lenis !== "undefined") {
+    // 读 <head> 内联定义的揭幕时长，避免这里另写一个常量跟它跑偏
+    function curtainMs() {
+        var v = getComputedStyle(de)
+            .getPropertyValue("--curtain-duration")
+            .trim();
+        var n = parseFloat(v);
+        if (!isFinite(n)) return 950;
+        return v.indexOf("ms") > -1 ? n : n * 1000;
+    }
+
+    function initSmoothScroll() {
+        if (lenis || reduced || typeof window.Lenis === "undefined") return;
+
         lenis = new window.Lenis({
             duration: 1.1,
             easing: function (t) {
                 return Math.min(1, 1.001 - Math.pow(2, -10 * t));
             },
             smoothWheel: true,
+            // 触底/触顶后不再累积越界的目标位置
+            overscroll: false,
         });
 
         // Lenis 接管滚动后，CSS 的 scroll-behavior 会打架，关掉它
         de.style.scrollBehavior = "auto";
 
-        (function raf(time) {
-            if (lenis) lenis.raf(time);
-            requestAnimationFrame(raf);
-        })(performance.now());
+        // 让 Lenis 驱动 GSAP 的时钟，而不是各跑一条 rAF。
+        // 两条独立的 rAF 会让 ScrollTrigger 读到迟一帧的位置，
+        // 滚动到区块边界时能看出抖动。
+        if (window.gsap && window.ScrollTrigger) {
+            lenis.on("scroll", window.ScrollTrigger.update);
+            window.gsap.ticker.add(function (time) {
+                lenis.raf(time * 1000);
+            });
+            window.gsap.ticker.lagSmoothing(0);
+        } else {
+            (function raf(time) {
+                if (lenis) lenis.raf(time);
+                requestAnimationFrame(raf);
+            })(performance.now());
+        }
 
         // 锚点交给 Lenis，才不会有"先跳再滑"的割裂感
         document.addEventListener("click", function (e) {
@@ -80,6 +105,40 @@
             target.setAttribute("tabindex", "-1");
             target.focus({ preventScroll: true });
         });
+    }
+
+    /* 平滑滚动必须等揭幕的位移动画走完再初始化。
+
+       揭幕期间内容整体下移 100vh，这会撑大文档的可滚动区域（实测
+   scrollHeight 4269 → 就绪后 3369，差整整一个视口）。此刻初始化，
+   Lenis 量到的就是虚高的 limit。而它的 Dimensions 靠 ResizeObserver
+   监听尺寸，ResizeObserver 看的是布局盒子 —— transform 不改变布局尺寸，
+   所以它永远发现不了这个变化，limit 会一直停在错的值上。
+   表现就是：滚到底后继续滚不报错，但反向要空滚好几下才开始上升。
+
+   加载期间本来也滚不动（内联 CSS 里锁了 overflow），所以推迟初始化
+   不会损失任何体验。 */
+    if (de.classList.contains("is-skip-preloader")) {
+        initSmoothScroll();
+    } else {
+        // 同一个原因，ScrollTrigger 也必须在位移动画结束后重新量一次：
+        // 各区块的入场触发点是在揭幕途中创建的，那时文档还高着一个视口，
+        // 算出来的 start/end 全部偏低。不刷新的话，滚到区块附近会看到
+        // 触发时机不对、甚至像是"刷了两次"。
+        function afterRevealLayoutSettles() {
+            initSmoothScroll();
+            if (window.ScrollTrigger) window.ScrollTrigger.refresh();
+        }
+
+        document.addEventListener(
+            "ohto:revealed",
+            function () {
+                setTimeout(afterRevealLayoutSettles, curtainMs() + 60);
+            },
+            { once: true }
+        );
+        // 兜底：万一 ohto:revealed 没来（脚本被拦等）
+        setTimeout(afterRevealLayoutSettles, 5000);
     }
 
     /* ======================================================================
@@ -505,7 +564,16 @@
     }
 
     /* ---- 启动 ---- */
+    var revealsStarted = false;
+
     function startReveals() {
+        // 必须防重入。ohto:revealed 和下面的兜底定时器都会走到这里，
+        // 早先没有这道闸，结果是 initGsap 跑了两遍 —— 每个元素身上挂了
+        // 两个 ScrollTrigger，滚到区块时会看见入场动画原地播两次，
+        // 像是页面"刷新了一下"。
+        if (revealsStarted) return;
+        revealsStarted = true;
+
         try {
             if (hasGsap) {
                 initGsap();
@@ -522,10 +590,18 @@
         // 本次访问没有加载页，直接开始
         startReveals();
     } else {
-        // 等加载页的幕布拉开再入场 —— 否则动画全在遮罩后面白跑一遍
-        document.addEventListener("ohto:revealed", startReveals, { once: true });
+        // 万一 ohto:revealed 没来（加载页脚本被拦等）的兜底。
+        // 引用要留住，好在事件正常时把它取消掉。
+        var revealFallback = setTimeout(startReveals, 4200);
 
-        // 万一那个事件没来（比如加载页脚本被拦），兜底
-        setTimeout(startReveals, 4200);
+        // 等加载页的幕布拉开再入场 —— 否则动画全在遮罩后面白跑一遍
+        document.addEventListener(
+            "ohto:revealed",
+            function () {
+                clearTimeout(revealFallback);
+                startReveals();
+            },
+            { once: true }
+        );
     }
 })();

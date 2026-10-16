@@ -33,11 +33,24 @@
 
 html {
     -webkit-text-size-adjust: 100%;
+    /* 无 JS 时锚点跳转的平滑滚动。 */
     scroll-behavior: smooth;
     /* 不要沿用旧站那句全局 *::-webkit-scrollbar { display: none } ——
        它抹掉了所有页面的滚动位置指示器。这里改成细滚动条。 */
     scrollbar-width: thin;
     scrollbar-color: var(--gray-500) transparent;
+}
+
+/* Lenis 接管滚动后，必须关掉 CSS 的平滑滚动，否则两者会互相抢滚动位置。
+
+   两个要点：
+   1. 判断依据用 Lenis 自己加在根元素上的 .lenis 类，而不是靠 JS 写内联样式 ——
+      没有时序竞争。
+   2. 必须带 !important。实测根元素的内联 style 上会带一条 scroll-behavior:
+      smooth（来源未查明，既不是本站的 JS 也不是 GSAP/ScrollTrigger 的写入），
+      内联声明优先级高于普通样式表规则，不加 !important 这条规则形同虚设。 */
+html.lenis {
+    scroll-behavior: auto !important;
 }
 
 body {
