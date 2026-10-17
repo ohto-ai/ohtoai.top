@@ -259,9 +259,12 @@
 
                 <div class="hero__copy">
                     <div class="hero__chip reveal">
-                        <img class="hero__avatar" src="assets/img/avatar.png"
-                            onerror="this.src='https://github.com/Ohto-Ai.png?size=320'" alt="Ohto-Ai" width="52"
-                            height="52" />
+                        <!-- 头像取自 me@ohtoai.top 的 Gravatar。静态 src 指向国内镜像；
+                             镜像不可用时由 avatar.js 依次接力官方站、GitHub 和本地文件。 -->
+                        <img class="hero__avatar" id="hero-avatar"
+                            src="https://gravatar.loli.net/avatar/6a04c274eb3d604821b4917304f0e7ae?s=320&amp;d=404"
+                            alt="Ohto-Ai" width="52" height="52" decoding="async"
+                            referrerpolicy="no-referrer" />
                         <span class="eyebrow">C++ Software Engineer</span>
                     </div>
 
@@ -495,6 +498,7 @@
     <script src="assets/js/hero-char.js"></script>
     <script src="assets/js/hero-canvas.js"></script>
     <script src="assets/js/work.js"></script>
+    <script src="assets/js/avatar.js"></script>
     <script src="assets/js/site.js"></script>
     <script src="assets/js/log-website.js"></script>
 </body>
