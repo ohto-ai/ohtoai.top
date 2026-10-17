@@ -223,59 +223,96 @@
 }
 
 /* --------------------------------------------------------------------------
-   作品卡片网格（错落有致）
+   作品区：扁平砖墙
 
-   12 栅格里按 7/5 交替跨列，同时让图片的宽高比逐张变化，
-   于是每张卡片高度不同、上下边缘参差 —— 这就是"错落"的来源。
-   align-items: start 是关键：不加的话同一行的卡片会被拉成等高，
-   参差感就没了。
+   每个项目是一块大矩形：图片块 + 文字块。文字块内部再分成标题 / 标签 /
+   描述 / 元信息几个小块，块与块之间只隔 1px 线。
+   砖与砖之间只留 2px 的缝，像砌墙一样拼在一起。
 
-   尺寸全部由 nth-child 决定，数据里不用写布局字段。
+   三列宽度 5 : 4 : 3，列内高度由图片比例和文字内容自然决定 ——
+   错落来自内容，不靠行高。宽列隔一块做一次横向图文，
+   解决"图文只能上下排"的问题。
    -------------------------------------------------------------------------- */
 .work-grid {
     display: grid;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    gap: clamp(1.5rem, 3vw, 2.75rem) clamp(1.25rem, 2.5vw, 2rem);
+    grid-template-columns: minmax(0, 5fr) minmax(0, 4fr) minmax(0, 3fr);
+    gap: 2px;
     align-items: start;
+}
+
+/* 三列顶边齐平 —— 错落全部来自每块内容的高度差，顶部是一条干净的直线 */
+.work-col {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
 }
 
 .work-card {
     display: flex;
     flex-direction: column;
-    gap: 0.875rem;
-    grid-column: span 6;
-    transition: var(--animation-fast);
+    min-width: 0;
+    background: var(--surface);
+    border-radius: 0;
+    overflow: hidden;
+    /* 整块不抬升 —— 一抬升砖缝就裂开了。反馈放在图片和描边上。 */
+    transition: background-color 0.35s var(--ease),
+        box-shadow 0.35s var(--ease);
 }
 
-/* 一行三张，跨列 5 / 4 / 3，下一行镜像成 3 / 4 / 5 —— 每行都刚好占满 12 栅格。
-   早先试过 7/5 两列：在 1440px 下宽卡有 700px，配 16:10 就是 430px 高，
-   一屏放不下两张，整个区块被拉得极长。5/4/3 才是能看的密度。 */
-.work-card:nth-child(6n + 1) { grid-column: span 5; }
-.work-card:nth-child(6n + 2) { grid-column: span 4; }
-.work-card:nth-child(6n + 3) { grid-column: span 3; }
-.work-card:nth-child(6n + 4) { grid-column: span 3; }
-.work-card:nth-child(6n + 5) { grid-column: span 4; }
-.work-card:nth-child(6n + 6) { grid-column: span 5; }
+/* 横向图文：图片在左、文字在右，合成一块更扁的砖。
+   图片略宽于文字区 —— 标题用下面单独调小的字号才放得下一行的长仓库名。 */
+.work-card--h {
+    display: grid;
+    grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
+    align-items: stretch;
+}
 
-/* 图片区。有截图就显示截图，没有就显示占位块。 */
+/* 隔一块翻转，图片换到右边 */
+.work-card--h-flip {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr);
+}
+
+.work-card--h-flip .work-card__shot { order: 2; }
+.work-card--h-flip .work-card__body { order: 1; }
+
+/* 图区。有截图就显示截图，没有就显示占位块。 */
 .work-card__shot {
     position: relative;
     overflow: hidden;
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border);
-    background: var(--surface);
-    aspect-ratio: 16 / 10;
-    transition: border-color 0.45s var(--ease), transform 0.55s var(--ease);
+    border-radius: 0;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-deep);
+    aspect-ratio: 4 / 3;
 }
 
-/* 宽高比跟着跨列宽度反向走：宽卡用扁比例、窄卡用竖比例，
-   这样同一行三张的高度才拉得开，形成错落；顺带每行总高也比较接近。 */
-.work-card:nth-child(6n + 1) .work-card__shot { aspect-ratio: 16 / 10; }
-.work-card:nth-child(6n + 2) .work-card__shot { aspect-ratio: 1 / 1; }
-.work-card:nth-child(6n + 3) .work-card__shot { aspect-ratio: 4 / 5; }
-.work-card:nth-child(6n + 4) .work-card__shot { aspect-ratio: 4 / 5; }
-.work-card:nth-child(6n + 5) .work-card__shot { aspect-ratio: 1 / 1; }
-.work-card:nth-child(6n + 6) .work-card__shot { aspect-ratio: 16 / 10; }
+.work-card--h .work-card__shot {
+    aspect-ratio: 5 / 4;
+    border-bottom: 0;
+    border-right: 1px solid var(--border);
+}
+
+.work-card--h-flip .work-card__shot {
+    border-right: 0;
+    border-left: 1px solid var(--border);
+}
+
+/* 每列的图片比例不同：宽列横一些，窄列竖一些。
+   同一列里再用 nth-child 隔一张换比例，让砖缝高低错开。 */
+.work-col--wide .work-card:not(.work-card--h) .work-card__shot {
+    aspect-ratio: 16 / 9;
+}
+
+.work-col--wide .work-card:not(.work-card--h):nth-child(3n) .work-card__shot {
+    aspect-ratio: 4 / 3;
+}
+
+/* 中列用更扁的横图 —— 它往往是最长的一列，竖图会把整面墙拖得太长 */
+.work-col--mid .work-card__shot { aspect-ratio: 3 / 2; }
+.work-col--mid .work-card:nth-child(2n) .work-card__shot { aspect-ratio: 4 / 3; }
+
+.work-col--narrow .work-card__shot { aspect-ratio: 3 / 4; }
+.work-col--narrow .work-card:nth-child(2n) .work-card__shot { aspect-ratio: 1 / 1; }
 
 .work-card__shot img {
     width: 100%;
@@ -292,7 +329,15 @@
     position: absolute;
     inset: 0;
     background: var(--lang, var(--text-muted));
-    opacity: 0.13;
+    opacity: 0.16;
+    transition: opacity 0.35s var(--ease);
+}
+
+
+/* 悬停时图块的语言色稍微提亮，整块有反馈但不会位移 */
+.work-card:hover .work-card__shot--ph::before,
+.work-card:focus-visible .work-card__shot--ph::before {
+    opacity: 0.24;
 }
 
 .work-card__shot--ph::after {
@@ -324,32 +369,40 @@
     z-index: 1;
 }
 
-/* 悬停：整卡微抬、图片轻推、边框转亮 */
-.work-card:hover .work-card__shot,
-.work-card:focus-within .work-card__shot {
-    border-color: var(--border-strong);
-    transform: translateY(-4px);
+/* 文字块：横向卡片里跟着图区拉满高度，多余空间给描述块吸收 */
+.work-card__body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
 }
 
-.work-card:hover .work-card__shot img,
-.work-card:focus-within .work-card__shot img {
-    transform: scale(1.04);
-}
-
-/* 文字区 */
+/* 标题块 */
 .work-card__title {
+    padding: 1rem 1.15rem 0.85rem;
     font-size: var(--fs-h3);
     letter-spacing: var(--ls-h3);
+    line-height: var(--lh-h3);
     font-weight: 500;
     color: var(--text-primary);
+    overflow-wrap: anywhere;
 }
 
-/* GitHub topics。它们本来就是小写连字符，不做 uppercase ——
+/* 横向卡片的文字区只有半块宽，标题要收小一号，
+   否则 NonogramGenerator 这种长名字会在词中间断行。 */
+.work-card--h .work-card__title {
+    font-size: clamp(1.05rem, 1.45vw, 1.25rem);
+    padding: 0.9rem 1.05rem 0.75rem;
+}
+
+/* 标签块。GitHub topics 本来就是小写连字符，不做 uppercase ——
    "CLOUDFLARE-WORKERS" 读起来比 "cloudflare-workers" 费劲。 */
 .work-card__tags {
     display: flex;
     flex-wrap: wrap;
     gap: 0.375rem;
+    padding: 0.7rem 1.15rem;
+    border-top: 1px solid var(--border);
 }
 
 .work-card__tag {
@@ -357,33 +410,65 @@
     font-size: var(--fs-eyebrow);
     letter-spacing: 0.02em;
     color: var(--text-muted);
-    padding: 0.2rem 0.55rem;
+    padding: 0.2rem 0.5rem;
     border: 1px solid var(--border);
-    border-radius: var(--radius-full);
+    border-radius: 0;
     transition: color 0.3s var(--ease), border-color 0.3s var(--ease);
 }
 
 .work-card:hover .work-card__tag,
-.work-card:focus-within .work-card__tag {
+.work-card:focus-visible .work-card__tag {
     color: var(--text-secondary);
     border-color: var(--border-strong);
 }
 
+/* 描述块 */
 .work-card__desc {
+    flex: 1;
+    padding: 0.75rem 1.15rem 1rem;
+    border-top: 1px solid var(--border);
     font-size: var(--fs-small);
     color: var(--text-muted);
     line-height: 1.55;
 }
 
+/* 元信息块 */
 .work-card__foot {
     display: flex;
     align-items: center;
     gap: 0.75rem;
     margin-top: auto;
-    padding-top: 0.25rem;
+    padding: 0.62rem 1.15rem 0.7rem;
+    border-top: 1px solid var(--border);
     font-family: var(--font-mono);
     font-size: var(--fs-small);
     color: var(--text-muted);
+}
+
+.work-card__arrow {
+    margin-left: auto;
+    color: var(--accent);
+    opacity: 0;
+    transform: translate(-4px, 4px);
+    transition: opacity 0.35s var(--ease), transform 0.35s var(--ease);
+}
+
+/* 悬停 / 键盘聚焦：整块不位移，只换底色、加一道内描边 */
+.work-card:hover,
+.work-card:focus-visible {
+    background: var(--surface-hover);
+    box-shadow: inset 0 0 0 1px var(--border-strong);
+}
+
+.work-card:hover .work-card__shot img,
+.work-card:focus-visible .work-card__shot img {
+    transform: scale(1.045);
+}
+
+.work-card:hover .work-card__arrow,
+.work-card:focus-visible .work-card__arrow {
+    opacity: 1;
+    transform: translate(0, 0);
 }
 
 .work-more {
@@ -559,40 +644,32 @@
    响应式
    -------------------------------------------------------------------------- */
 /* 中等宽度：三列太挤，退成两列，保留一宽一窄的参差 */
-@media (max-width: 1080px) {
-    .work-card:nth-child(6n + 1),
-    .work-card:nth-child(6n + 3),
-    .work-card:nth-child(6n + 5) { grid-column: span 7; }
-
-    .work-card:nth-child(6n + 2),
-    .work-card:nth-child(6n + 4),
-    .work-card:nth-child(6n + 6) { grid-column: span 5; }
-
-    .work-card:nth-child(6n + 2) .work-card__shot,
-    .work-card:nth-child(6n + 3) .work-card__shot { aspect-ratio: 1 / 1; }
+@media (max-width: 1100px) {
+    .work-grid {
+        grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    }
 }
 
-@media (max-width: 640px) {
-    /* 单列：错落没有意义，统一比例 */
-    .work-card,
-    .work-card:nth-child(6n + 1),
-    .work-card:nth-child(6n + 2),
-    .work-card:nth-child(6n + 3),
-    .work-card:nth-child(6n + 4),
-    .work-card:nth-child(6n + 5),
-    .work-card:nth-child(6n + 6) {
-        grid-column: span 12;
+@media (max-width: 760px) {
+    /* 单列：列宽固定，横向图文在这个宽度下会把文字挤扁，统一退回纵向 */
+    .work-grid {
+        grid-template-columns: minmax(0, 1fr);
     }
 
-    .work-card .work-card__shot,
-    .work-card:nth-child(6n + 1) .work-card__shot,
-    .work-card:nth-child(6n + 2) .work-card__shot,
-    .work-card:nth-child(6n + 3) .work-card__shot,
-    .work-card:nth-child(6n + 4) .work-card__shot,
-    .work-card:nth-child(6n + 5) .work-card__shot,
-    .work-card:nth-child(6n + 6) .work-card__shot {
-        aspect-ratio: 16 / 10;
+    .work-grid .work-card--h {
+        display: flex;
+        flex-direction: column;
     }
+
+    .work-grid .work-card--h .work-card__shot {
+        order: 0;
+        aspect-ratio: 16 / 9;
+        border-right: 0;
+        border-left: 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .work-grid .work-card--h .work-card__body { order: 0; }
 
     /* 无 JS 降级列表在窄屏的排布 */
     .work-row {

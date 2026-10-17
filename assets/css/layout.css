@@ -577,7 +577,6 @@ html.js .site-nav[data-scrolled] {
     letter-spacing: var(--ls-h2);
     line-height: var(--lh-h2);
     font-weight: 500;
-    margin-top: 0.75rem;
 }
 
 .section-head__count {
