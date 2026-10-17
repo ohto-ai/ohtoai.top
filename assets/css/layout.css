@@ -413,10 +413,14 @@ html.js .site-nav[data-scrolled] {
     height: 100%;
 }
 
-/* 文字压在动画之上 */
+/* 文字压在动画之上。
+   宽度必须收成内容宽度：块级元素默认占满整行，透明的那半截会盖住
+   右侧立绘，把点击全部截走。 */
 .hero__copy {
     position: relative;
     z-index: 1;
+    width: fit-content;
+    max-width: 100%;
 }
 
 /* 注意：这里一律 right: 0，不要用负偏移"探出"容器。
@@ -433,27 +437,33 @@ html.js .site-nav[data-scrolled] {
 
 /* 窄屏没有横向空间并排 —— 退到文字后面当底纹 */
 /* 窄屏：文字占满宽度，立绘退成背景质感。
-   透明度压到 0.16、位置上移 —— 30% 时它正压在正文和宣言那几行下面，
-   字读起来发糊。
-   线框直接收掉：立绘已经淡成 16%，再叠一层会变成噪点，
-   实测背景看着发脏、正文更难读。 */
+   位置上移 —— 30% 时它正压在正文和宣言那几行下面，字读起来发糊。
+   注意透明度不能加在 .hero__char 上：那会把线框二十面体一起压到
+   几乎不可见。这里只淡出立绘本身和柔光，线框单独控制。 */
 @media (max-width: 860px) {
     .hero__char {
         top: 26%;
         /* 同样不能用负的 right —— 会撑宽页面 */
         right: 0;
         width: min(64vw, 320px);
+        opacity: 1;
+    }
+
+    .hero__char-stage {
+        opacity: 0.16;
+        /* 窄屏立绘退成底纹，不再拦截点击 */
+        pointer-events: none;
+        cursor: default;
+    }
+
+    .hero__char-glow {
         opacity: 0.16;
     }
 
+    /* 线框留在立绘背后，压得比桌面更淡，避免干扰正文 */
     .hero__backdrop {
-        display: none;
-    }
-
-    /* 窄屏立绘退成底纹，不再拦截点击 */
-    .hero__char-stage {
-        pointer-events: none;
-        cursor: default;
+        inset: -40%;
+        opacity: 0.24;
     }
 }
 
