@@ -1,12 +1,14 @@
 /*
  * hero-char.js — 首屏立绘动画
  *
- * v3.8 素材是预先拆好的分层图，按顺序画在同一个 1200×1200 画布上：
+ * v3.14 素材是预先拆好的分层图，按顺序画在同一个 1200×1200 画布上：
  *
- *   base-clean      底图，眼眶留空
+ *   base-clean      底图，暖肤色，眼眶留空
+ *   face-shading    脸部/下巴的 cel-shading 与刘海投影
  *   iris-gold/blue  虹膜，裁剪在眼眶路径内，随光标连续移动
- *   blink-eyes      闭眼覆盖层，只在眨眼时叠加
- *   bangs-front     遮住右眼的刘海，永远最后画
+ *   blink-eyes      闭眼覆盖层，只在眨眼时叠加（眼周已是同肤色）
+ *   bangs-front     遮住右眼的刘海
+ *   hair-clip       绿色三角形发饰，永远最后画
  *
  * 和之前的四帧切换相比，眨眼不再切换整张图：底图、头发和脸部
  * 始终保持不动，只有眼部局部变化，虹膜也是连续位移而不是换帧。
@@ -31,13 +33,15 @@
 
     var SOURCES = {
         base: BASE + "base-clean.webp",
+        faceShade: BASE + "face-shading.svg",
         gold: BASE + "iris-gold.svg",
         blue: BASE + "iris-blue.svg",
         bangs: BASE + "bangs-front.webp",
+        clip: BASE + "hair-clip.svg",
         blink: BASE + "blink-eyes.webp",
     };
 
-    var CORE = ["base", "gold", "blue", "bangs"];
+    var CORE = ["base", "faceShade", "gold", "blue", "bangs", "clip"];
     var assets = {};
     var pending = CORE.length;
     var coreLoaded = false;
@@ -86,6 +90,9 @@
 
         if (assets.base) ctx.drawImage(assets.base, 0, 0, W, H);
 
+        // 脸部阴影叠在底图之上、虹膜之下，眼白区域不受影响
+        if (assets.faceShade) ctx.drawImage(assets.faceShade, 0, 0, W, H);
+
         // 闭眼层没加载好时继续画睁眼，宁可晚一点眨，也不要空着眼眶
         if (closed && assets.blink) {
             ctx.drawImage(assets.blink, 0, 0, W, H);
@@ -108,14 +115,15 @@
             });
         }
 
-        // 刘海最后画：蓝色虹膜再往外移，也不会跑到头发前面
+        // 刘海压住虹膜，发饰再压在刘海之上
         if (assets.bangs) ctx.drawImage(assets.bangs, 0, 0, W, H);
+        if (assets.clip) ctx.drawImage(assets.clip, 0, 0, W, H);
     }
 
     /* ----------------------------------------------------------------------
        素材加载
 
-       底图、虹膜和刘海到齐就能开画；闭眼层单独加载，
+       底图、阴影、虹膜、刘海和发饰到齐就能开画；闭眼层单独加载，
        没到之前只是不眨眼，不影响正常显示。
        ---------------------------------------------------------------------- */
     function coreDone() {
