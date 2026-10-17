@@ -278,8 +278,8 @@
 
         // 聚光灯：rAF 插值。追平目标就停帧，下次 mousemove 再唤醒 ——
         // 光标静止时不该还占着一条 rAF。
-        // 立绘的跟随/眨眼挪到了 hero-char.js —— 那是换帧动画，
-        // 和这里的指针效果不是一回事，混在一起只会互相干扰。
+        // 立绘的跟随/眨眼挪到了 hero-char.js —— 那是在 canvas 上
+        // 分层合成的动画，和这里的指针效果不是一回事，混在一起只会互相干扰。
         function spotLoop() {
             spot.x += (spot.tx - spot.x) * 0.09;
             spot.y += (spot.ty - spot.y) * 0.09;

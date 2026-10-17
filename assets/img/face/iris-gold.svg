@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="160" viewBox="0 0 128 160">
+<defs>
+ <linearGradient id="gold" x1="0" y1="0" x2=".12" y2="1">
+  <stop offset="0" stop-color="#4a2c22"/><stop offset=".24" stop-color="#8a5528"/><stop offset=".52" stop-color="#d9942e"/><stop offset=".78" stop-color="#ffc84b"/><stop offset="1" stop-color="#fff19a"/>
+ </linearGradient>
+ <linearGradient id="shine" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#fff7c8"/><stop offset="1" stop-color="#ffdb63"/>
+ </linearGradient>
+ <clipPath id="irisclip"><path d="M64 19 C38 19 24 42 25 74 C26 109 43 137 64 141 C85 137 102 109 103 74 C104 42 90 19 64 19Z"/></clipPath>
+ <radialGradient id="glow" cx=".5" cy=".65" r=".6"><stop offset="0" stop-color="#fff7b0" stop-opacity=".9"/><stop offset="1" stop-color="#ffb52b" stop-opacity="0"/></radialGradient>
+</defs>
+<!-- Iris only: no eye-white, eyelid, lash or outside black rim -->
+<path d="M64 19 C38 19 24 42 25 74 C26 109 43 137 64 141 C85 137 102 109 103 74 C104 42 90 19 64 19Z" fill="url(#gold)" stroke="#11152f" stroke-width="5" stroke-linejoin="round"/>
+<g clip-path="url(#irisclip)">
+ <rect x="22" y="20" width="84" height="124" fill="url(#gold)"/>
+ <ellipse cx="64" cy="101" rx="44" ry="48" fill="url(#glow)"/>
+ <path d="M31 43 Q64 35 97 43" fill="none" stroke="#ffdf75" stroke-width="1.4" opacity=".34"/>
+ <path d="M33 49 Q64 41 95 49" fill="none" stroke="#ffdf75" stroke-width="1.4" opacity=".34"/>
+ <path d="M35 55 Q64 47 93 55" fill="none" stroke="#ffdf75" stroke-width="1.4" opacity=".34"/>
+ <path d="M31 61 Q64 53 97 61" fill="none" stroke="#ffdf75" stroke-width="1.4" opacity=".34"/>
+ <path d="M33 67 Q64 59 95 67" fill="none" stroke="#ffdf75" stroke-width="1.4" opacity=".34"/>
+ <path d="M35 73 Q64 65 93 73" fill="none" stroke="#ffdf75" stroke-width="1.4" opacity=".34"/>
+ <path d="M31 79 Q64 71 97 79" fill="none" stroke="#ffdf75" stroke-width="1.4" opacity=".34"/>
+ <path d="M33 85 Q64 77 95 85" fill="none" stroke="#ffdf75" stroke-width="1.4" opacity=".34"/>
+ <path d="M35 91 Q64 83 93 91" fill="none" stroke="#ffdf75" stroke-width="1.4" opacity=".34"/>
+ <path d="M31 97 Q64 89 97 97" fill="none" stroke="#ffdf75" stroke-width="1.4" opacity=".34"/>
+ <path d="M33 103 Q64 95 95 103" fill="none" stroke="#ffdf75" stroke-width="1.4" opacity=".34"/>
+ <path d="M35 109 Q64 101 93 109" fill="none" stroke="#ffdf75" stroke-width="1.4" opacity=".34"/>
+ <path d="M31 115 Q64 107 97 115" fill="none" stroke="#ffdf75" stroke-width="1.4" opacity=".34"/>
+ <path d="M31 58 Q47 38 64 44 Q82 38 97 58 L96 70 Q81 59 64 61 Q46 59 32 70Z" fill="#442d29" opacity=".9"/>
+ <path d="M36 77 Q49 68 64 72 Q80 68 92 77 L89 88 Q76 82 64 84 Q50 82 39 88Z" fill="#5d3827" opacity=".6"/>
+ <path d="M34 113 Q48 129 64 131 Q80 129 94 113 L88 137 L40 137Z" fill="#ffe78a" opacity=".75"/>
+</g>
+<!-- Signature star -->
+<path d="M64 58 L72 78 L91 86 L72 94 L64 114 L56 94 L37 86 L56 78Z" fill="url(#shine)" stroke="#fff1a0" stroke-width="1.7" stroke-linejoin="round"/>
+<path d="M64 68 L69 82 L82 86 L69 91 L64 104 L59 91 L46 86 L59 82Z" fill="#fff9d4" opacity=".9"/>
+<!-- soft lower glint -->
+<ellipse cx="64" cy="124" rx="13" ry="10" fill="#fff8a6"/>
+<ellipse cx="46" cy="42" rx="10" ry="14" fill="#fffdf7" transform="rotate(-26 46 42)"/>
+<ellipse cx="47" cy="42" rx="6" ry="9" fill="#ffffff" transform="rotate(-26 47 42)"/>
+<circle cx="83" cy="50" r="4.5" fill="#fff8d6"/>
+<circle cx="86" cy="56" r="2" fill="#ffffff"/>
+</svg>

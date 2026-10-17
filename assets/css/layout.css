@@ -329,14 +329,14 @@ html.js .site-nav[data-scrolled] {
 
 /* 常驻动画：大户爱的立绘。
    放在首屏右半边那片空白里，补上版面重心。
-   动效走整体位移（浮动 / 跟随光标倾角 / 星光闪烁），不做分层动画 ——
-   原因见 index.html 那段注释。 */
+   画面由 hero-char.js 在 canvas 上分层合成（虹膜跟随 / 局部眨眼），
+   这里只管定位、呼吸和跟随光标的整体倾斜。 */
 .hero__char {
     position: absolute;
     top: 50%;
     right: 0;
     width: clamp(300px, 38vw, 580px);
-    aspect-ratio: 1;             /* 帧图是 1200×1200 正方形 */
+    aspect-ratio: 1;             /* 素材是 1200×1200 正方形 */
     /* 垂直居中用负 margin，不用 translate: 0 -50%。
        实测 translate 那版在这台机器上没进 getBoundingClientRect ——
        computed 值明明写着 "0px -50%"，元素却停在下方被视口切掉。
@@ -395,28 +395,22 @@ html.js .site-nav[data-scrolled] {
     to   { transform: translateY(9px); }
 }
 
-/* 跟随光标平移 + 倾斜加在这一层（由 JS 写 transform） */
+/* 跟随光标平移 + 倾斜加在这一层（由 JS 写 transform）。
+   指针事件也只开在这一层：点角色会眨眼，背后的柔光和线框仍然穿透。 */
 .hero__char-stage {
     position: relative;
     width: 100%;
     height: 100%;
     will-change: transform;
+    pointer-events: auto;
+    cursor: pointer;
 }
 
-/* 四帧叠在同一格子里，靠 opacity 切换。
-   淡入淡出用 60ms —— 再长会糊成两双眼睛，再短就显生硬。 */
-.hero__frame {
-    position: absolute;
-    inset: 0;
+/* 画布与素材共用 1200×1200 坐标系，显示尺寸完全交给 .hero__char */
+.hero__face {
+    display: block;
     width: 100%;
     height: 100%;
-    object-fit: contain;
-    opacity: 0;
-    transition: opacity 0.06s linear;
-}
-
-.hero__frame[data-on] {
-    opacity: 1;
 }
 
 /* 文字压在动画之上 */
@@ -454,6 +448,12 @@ html.js .site-nav[data-scrolled] {
 
     .hero__backdrop {
         display: none;
+    }
+
+    /* 窄屏立绘退成底纹，不再拦截点击 */
+    .hero__char-stage {
+        pointer-events: none;
+        cursor: default;
     }
 }
 

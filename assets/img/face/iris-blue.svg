@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="132" viewBox="0 0 100 132">
+<defs>
+ <linearGradient id="blue" x1="0" y1="0" x2=".12" y2="1">
+  <stop offset="0" stop-color="#102c68"/><stop offset=".28" stop-color="#0866bf"/><stop offset=".58" stop-color="#13a9ef"/><stop offset=".82" stop-color="#47ddff"/><stop offset="1" stop-color="#b9f8ff"/>
+ </linearGradient>
+ <linearGradient id="ice" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#eaffff"/><stop offset="1" stop-color="#7beaff"/>
+ </linearGradient>
+ <clipPath id="irisclip"><path d="M50 13 C30 13 18 32 19 59 C20 86 34 111 50 115 C66 111 80 86 81 59 C82 32 70 13 50 13Z"/></clipPath>
+ <radialGradient id="glow" cx=".5" cy=".7" r=".65"><stop offset="0" stop-color="#b4ffff" stop-opacity=".95"/><stop offset="1" stop-color="#26d5ff" stop-opacity="0"/></radialGradient>
+</defs>
+<!-- Iris only: clean transparent outer margin -->
+<path d="M50 13 C30 13 18 32 19 59 C20 86 34 111 50 115 C66 111 80 86 81 59 C82 32 70 13 50 13Z" fill="url(#blue)" stroke="#11152f" stroke-width="5" stroke-linejoin="round"/>
+<g clip-path="url(#irisclip)">
+ <rect x="16" y="12" width="68" height="106" fill="url(#blue)"/>
+ <ellipse cx="50" cy="83" rx="37" ry="39" fill="url(#glow)"/>
+ <path d="M23 36.0 Q50 29.0 77 36.0" fill="none" stroke="#a2f4ff" stroke-width="1.2" opacity=".3"/>
+ <path d="M23 41.7 Q50 34.7 77 41.7" fill="none" stroke="#a2f4ff" stroke-width="1.2" opacity=".3"/>
+ <path d="M23 47.4 Q50 40.4 77 47.4" fill="none" stroke="#a2f4ff" stroke-width="1.2" opacity=".3"/>
+ <path d="M23 53.1 Q50 46.1 77 53.1" fill="none" stroke="#a2f4ff" stroke-width="1.2" opacity=".3"/>
+ <path d="M23 58.8 Q50 51.8 77 58.8" fill="none" stroke="#a2f4ff" stroke-width="1.2" opacity=".3"/>
+ <path d="M23 64.5 Q50 57.5 77 64.5" fill="none" stroke="#a2f4ff" stroke-width="1.2" opacity=".3"/>
+ <path d="M23 70.2 Q50 63.2 77 70.2" fill="none" stroke="#a2f4ff" stroke-width="1.2" opacity=".3"/>
+ <path d="M23 75.9 Q50 68.9 77 75.9" fill="none" stroke="#a2f4ff" stroke-width="1.2" opacity=".3"/>
+ <path d="M23 81.6 Q50 74.6 77 81.6" fill="none" stroke="#a2f4ff" stroke-width="1.2" opacity=".3"/>
+ <path d="M23 87.3 Q50 80.3 77 87.3" fill="none" stroke="#a2f4ff" stroke-width="1.2" opacity=".3"/>
+ <path d="M23 93.0 Q50 86.0 77 93.0" fill="none" stroke="#a2f4ff" stroke-width="1.2" opacity=".3"/>
+ <path d="M23 98.7 Q50 91.7 77 98.7" fill="none" stroke="#a2f4ff" stroke-width="1.2" opacity=".3"/>
+ <path d="M22 43 Q36 27 50 32 Q66 27 78 43 L77 53 Q64 44 50 46 Q36 44 23 53Z" fill="#092f69" opacity=".92"/>
+ <path d="M25 62 Q38 54 50 57 Q64 54 75 62 L72 72 Q61 67 50 69 Q38 67 28 72Z" fill="#0756a1" opacity=".7"/>
+ <path d="M25 92 Q38 108 50 109 Q64 108 76 92 L70 116 L30 116Z" fill="#9af5ff" opacity=".7"/>
+</g>
+<!-- Blue star with bright cyan core -->
+<path d="M50 42 L57 60 L74 67 L57 74 L50 92 L43 74 L26 67 L43 60Z" fill="#fff6a8" stroke="#d5ffff" stroke-width="1.6" stroke-linejoin="round"/>
+<path d="M50 51 L54 63 L66 67 L54 72 L50 84 L46 72 L34 67 L46 63Z" fill="#ffffff" opacity=".96"/>
+<ellipse cx="50" cy="100" rx="10" ry="8" fill="#c8ffff"/>
+<ellipse cx="36" cy="31" rx="8" ry="11" fill="#ffffff" transform="rotate(-26 36 31)"/>
+<circle cx="65" cy="39" r="4" fill="#eaffff"/>
+<circle cx="67" cy="45" r="1.8" fill="#ffffff"/>
+</svg>

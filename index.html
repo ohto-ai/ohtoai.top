@@ -93,6 +93,9 @@
     <link rel="preload" as="font" type="font/woff2" crossorigin
         href="assets/fonts/inter/inter-latin-wght-normal.woff2" />
 
+    <!-- 立绘底图是首屏最大的那张图，先让浏览器开始下载 -->
+    <link rel="preload" as="image" type="image/webp" href="assets/img/face/base-clean.webp" />
+
     <link rel="stylesheet" href="assets/css/tokens.css" />
     <link rel="stylesheet" href="assets/css/base.css" />
     <link rel="stylesheet" href="assets/css/layout.css" />
@@ -237,11 +240,11 @@
              ================================================================== -->
         <section class="hero" id="top">
             <div class="container">
-                <!-- 常驻动画：大户爱，四帧切换 + 平滑跟随。
-                     走「预渲染多帧」而不是分层动画 —— 眼睛的睑线和盖住右眼的
-                     刘海颜色完全一样（都是深蓝紫），按颜色分不开，
-                     分层抹除必然误伤一边。换帧就没这个问题。
-                     只有 normal 写在 HTML 里，另外三帧由 JS 在主内容就绪后加载。 -->
+                <!-- 常驻动画：大户爱，Canvas 分层合成 + 平滑跟随。
+                     v3.8 素材把眼睛和刘海预先拆成了独立图层：
+                     底图眼眶留空，两枚虹膜裁剪在眼眶内随光标连续移动，
+                     闭眼只叠加眼部覆盖层，刘海永远最后画。
+                     眨眼不再切换整张图，底图、头发和背景始终不动。 -->
                 <div class="hero__char" id="hero-char" aria-hidden="true">
                     <!-- 旧版首屏那个自转的线框二十面体，现在退到立绘背后当底衬。
                          比角色大一圈，只在她的轮廓之外露出来。 -->
@@ -250,11 +253,7 @@
                     </div>
                     <div class="hero__char-glow"></div>
                     <div class="hero__char-stage" id="hero-stage">
-                        <img class="hero__frame" data-frame="normal" src="assets/img/face/normal.png"
-                            alt="" width="1200" height="1200" decoding="async" />
-                        <img class="hero__frame" data-frame="left" alt="" width="1200" height="1200" />
-                        <img class="hero__frame" data-frame="right" alt="" width="1200" height="1200" />
-                        <img class="hero__frame" data-frame="blink" alt="" width="1200" height="1200" />
+                        <canvas class="hero__face" id="hero-face" width="1200" height="1200"></canvas>
                     </div>
                 </div>
 
