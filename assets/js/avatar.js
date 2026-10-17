@@ -2,13 +2,18 @@
  * avatar.js — 首屏头像的国内外 CDN 接力
  *
  * 头像托管在 Gravatar（邮箱 me@ohtoai.top，哈希 = md5("me@ohtoai.top")）。
- * gravatar.com 在国外最稳，国内却经常慢或连不上；gravatar.loli.net 是
- * 国内镜像，代理的是同一张图。于是按下面顺序接力：
+ * gravatar.com 在国外最稳，国内却经常慢或连不上；国内镜像代理的是同一张图。
+ * 于是按下面顺序接力：
  *
- *   1. gravatar.loli.net   国内镜像，index.html 里的静态 src 已经指向它
- *   2. gravatar.com        Gravatar 官方
- *   3. github.com          个人 GitHub 头像
- *   4. assets/img/avatar.png  本地文件，同源兜底
+ *   1. cdn.v2ex.com/gravatar   国内可用的镜像，认 s 参数（160px 约 27KB）
+ *   2. gravatar.loli.net       国内镜像，固定返回 320px（约 74KB），作兜底
+ *   3. gravatar.com            Gravatar 官方
+ *   4. github.com              个人 GitHub 头像
+ *   5. assets/img/avatar.png   本地文件，同源兜底
+ *
+ * 第一源之所以不是 loli：loli 不认 s 参数，52px 的头像也要传 320px 的图；
+ * v2ex 能按 160px 返回，流量少一半多，实测国内可用。loli 留作第二源，
+ * 万一 v2ex 被 Cloudflare 路由拖慢或不可用，仍然有国内兜底。
  *
  * 每个源最多等 2.5 秒。有的网络对连不上的域名既不返回成功也不报错，
  * 只靠 onerror 会一直空白，所以必须有超时看门狗。任意一源加载成功
@@ -25,6 +30,7 @@
     var HASH = "6a04c274eb3d604821b4917304f0e7ae";
     var TIMEOUT = 2500;
     var SOURCES = [
+        "https://cdn.v2ex.com/gravatar/" + HASH + "?s=160&d=404",
         "https://gravatar.loli.net/avatar/" + HASH + "?s=320&d=404",
         "https://gravatar.com/avatar/" + HASH + "?s=160&d=404",
         "https://github.com/Ohto-Ai.png?size=160",
