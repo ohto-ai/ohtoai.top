@@ -25,7 +25,7 @@ window.OhtoRepos = {
         "student-project",
         "windows"
       ],
-      "shot": ""
+      "shot": "assets/work/PostLive.webp"
     },
     {
       "name": "LightPaper",
@@ -40,7 +40,7 @@ window.OhtoRepos = {
         "wallpaper-engine",
         "windows"
       ],
-      "shot": ""
+      "shot": "assets/work/LightPaper.webp"
     },
     {
       "name": "NonogramGenerator",
@@ -55,7 +55,7 @@ window.OhtoRepos = {
         "nonogram",
         "puzzle"
       ],
-      "shot": ""
+      "shot": "assets/work/NonogramGenerator.gif"
     },
     {
       "name": "picbed",
@@ -72,7 +72,7 @@ window.OhtoRepos = {
         "serverless",
         "static-website"
       ],
-      "shot": ""
+      "shot": "assets/work/picbed.webp"
     },
     {
       "name": "webhook",
@@ -88,7 +88,7 @@ window.OhtoRepos = {
         "library",
         "webhook"
       ],
-      "shot": ""
+      "shot": "assets/work/webhook.webp"
     },
     {
       "name": "client-tools",
@@ -105,7 +105,7 @@ window.OhtoRepos = {
         "minecraft-mod",
         "utility"
       ],
-      "shot": ""
+      "shot": "assets/work/client-tools.webp"
     },
     {
       "name": "OpShop",
@@ -123,7 +123,7 @@ window.OhtoRepos = {
         "shop",
         "vault"
       ],
-      "shot": ""
+      "shot": "assets/work/OpShop.webp"
     },
     {
       "name": "auto-craft",
@@ -139,7 +139,7 @@ window.OhtoRepos = {
         "minecraft",
         "minecraft-mod"
       ],
-      "shot": ""
+      "shot": "assets/work/auto-craft.webp"
     },
     {
       "name": "MobEditor",
@@ -155,7 +155,7 @@ window.OhtoRepos = {
         "paper-plugin",
         "spawn-egg"
       ],
-      "shot": ""
+      "shot": "assets/work/MobEditor.webp"
     },
     {
       "name": "illegal-scanner",
@@ -171,7 +171,7 @@ window.OhtoRepos = {
         "paper-plugin",
         "scanner"
       ],
-      "shot": ""
+      "shot": "assets/work/illegal-scanner.webp"
     },
     {
       "name": "SkullShop",
@@ -189,7 +189,7 @@ window.OhtoRepos = {
         "shop",
         "vault"
       ],
-      "shot": ""
+      "shot": "assets/work/SkullShop.webp"
     },
     {
       "name": "no-hide-flags",
@@ -205,7 +205,7 @@ window.OhtoRepos = {
         "nbt",
         "tooltip"
       ],
-      "shot": ""
+      "shot": "assets/work/no-hide-flags.webp"
     }
   ]
 }
