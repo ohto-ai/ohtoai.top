@@ -1,12 +1,55 @@
 <!DOCTYPE html>
-<html>
-<link href="assets/css/mainstyle.css" rel="stylesheet">
+<html lang="zh-CN">
 
-<body class="main-page" topmargin="0" oncontextmenu="return false" ondragstart="return false"
-    onselectstart="return false" onselect="document.selection.empty()" oncopy="document.selection.empty()"
-    onbeforecopy="return false" onmouseup="document.selection.empty()">
-    <audio autoplay="autoplay" preload="preload" id="music">
-    </audio>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>thatboy - music</title>
+    <link rel="Shortcut Icon" href="assets/icon/boy.ico" type="image/ico">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            background: #1D1D1D;
+            color: #F0F0F0;
+            font-family: sans-serif;
+            user-select: none;
+        }
+        button {
+            padding: 8px 16px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <audio id="music" preload="none"></audio>
+    <button id="toggle" type="button">播放 / 暂停</button>
+
+    <script src="assets/js/bkmusic.js"></script>
+    <script>
+        var music = document.getElementById("music");
+        document.getElementById("toggle").addEventListener("click", function () {
+            if (music.paused) {
+                if (music.src) {
+                    var result = music.play();
+                    if (result && result.catch) result.catch(function () { });
+                } else {
+                    window.startMusic();
+                }
+            } else {
+                music.pause();
+            }
+        });
+    </script>
 </body>
-<script charset="utf-8" src="assets/js/bkmusic.js"></script>
+
 </html>

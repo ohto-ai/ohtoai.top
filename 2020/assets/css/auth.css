@@ -173,6 +173,7 @@ a.boardtop-left:hover {
 }
 .auth-logo img {
 	max-width: 100px;
+	height: auto;
 	border-radius: 50%;
 	margin: 1em 0 1em 0;
 	box-shadow: 0 0 5px 0 #afafaf;

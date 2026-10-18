@@ -9,11 +9,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <title>thatboy</title>
     <link rel="Shortcut Icon" href="assets/icon/boy.ico" type="image/ico">
-    <script type="text/javascript" src="assets/js/jquery-3.4.1.min.js"></script>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <link href="assets/css/mainstyle.css" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/future_ui.css">
-    <script charset="utf-8" src="assets/js/bkmusic.js"></script>
+    <!-- jQuery is not used on this page. Music starts on the first interaction. -->
+    <script charset="utf-8" src="assets/js/bkmusic.js" defer></script>
 
 </head>
 
@@ -147,7 +146,8 @@
             <img style="height:2rem; width:auto; transform: scaleX(-1);" src="assets/images/Annoying_Dog.gif">
             <a target="_blank" href="https://zhouhuan1004.gitee.io/"><img style="height:2rem; width:auto;
      border-radius: 50%; border: 3px solid #FFF;"
-                    src="https://cdn.jsdelivr.net/gh/zhouhuan666/BlogAssets@0.11/SettingPic/avatar.JPG"></a>
+                    width="192" height="192" decoding="async"
+                    src="assets/images/social/friend-avatar-192.webp"></a>
         </div>
         <div id="helltaker-ico-group">
             <img style="height:2rem; width:auto; "
@@ -377,7 +377,7 @@
                         Good Good Study?
                     </div>
                 </div>
-                <div onclick="top.location.href='content.html'" class="future_ui__piece">
+                <div onclick="try{sessionStorage.setItem('thatboy-music-muted','1')}catch(e){};top.location.href='content.html'" class="future_ui__piece">
                     <span>Home <del>Music</del></span>
                     <div class="line"></div>
                     <div class="tip">
@@ -388,14 +388,16 @@
                     <span>Class Schedule</span>
                     <div class="line"></div>
                     <div class="tip">
-                        <img src="https://i.loli.net/2017/08/02/598187babf39e.gif">
+                        <img data-src="assets/images/ui/class-schedule.gif" width="150" height="159"
+                            alt="Class Schedule">
                     </div>
                 </div>
                 <div onclick="location.href='software/ThatboyEncryptFileEncoderInstaller.msi'" class="future_ui__piece">
                     <span>Thatboy Encrypt</span>
                     <div class="line"></div>
                     <div class="tip">
-                        <img src="assets/images/ThatboyEncryptFileEncoder.png" width="80px" height="80px">
+                        <img src="assets/images/ThatboyEncryptFileEncoder-160.webp" width="80" height="80"
+                            loading="lazy" decoding="async" alt="Thatboy Encrypt">
                     </div>
                 </div>
                 <div class="future_ui__piece">
@@ -450,7 +452,8 @@
                     <span>File Download</span>
                     <div class="line"></div>
                     <div class="tip">
-                        <img style="width: 300px; height:auto;" src="assets/images/sans-attack.gif">
+                        <img style="width: 300px; height:auto;" data-src="assets/images/sans-attack.gif"
+                            width="300" height="150" alt="File Download">
                     </div>
                 </div>
             </div>
@@ -474,7 +477,8 @@
         });
     </script> -->
 
-    <audio id="sound" src="assets/sound/for_the_union.ogg"></audio>
+    <audio id="music" preload="none"></audio>
+    <audio id="sound" src="assets/sound/for_the_union.ogg" preload="none"></audio>
     <a title="不加这个会被警察蜀黍暴打嗷┗|｀O′|┛ ~~" style="position: fixed; bottom: 2rem; left: 1rem; font-size: 0.5rem;"
         target="_blank" href="http://www.beian.miit.gov.cn">
         <img style="width: 0.5rem;height:0.5rem;" src="assets/images/beian.png">苏ICP备19061327号-1</a>
@@ -493,7 +497,26 @@
     window.onload = function () {
         changeSocialShow();
         sound.volume = 0.5;
-    }
+    };
+
+    // The two large preview GIFs are only visible on hover. Load them then,
+    // instead of during the initial page load.
+    (function () {
+        function loadPreview(piece) {
+            var img = piece.querySelector("img[data-src]");
+            if (!img) return;
+            img.src = img.getAttribute("data-src");
+            img.removeAttribute("data-src");
+        }
+        var pieces = document.querySelectorAll(".future_ui__piece");
+        for (var i = 0; i < pieces.length; i++) {
+            (function (piece) {
+                piece.addEventListener("mouseenter", function () {
+                    loadPreview(piece);
+                }, { once: true });
+            })(pieces[i]);
+        }
+    })();
 </script>
 
 </html>
