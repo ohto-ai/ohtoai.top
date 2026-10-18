@@ -4,24 +4,26 @@
  * 本文件由 .github/workflows/repos.yml 自动生成，请勿手工编辑。
  * 页面把它当普通本地脚本加载，不在运行时调 GitHub API。
  *
- * @generated 2026-10-16T15:59:07Z
+ * @generated 2026-10-18T16:30:06Z
  */
 window.OhtoRepos = {
-  "generated": "2026-10-16",
+  "generated": "2026-10-18",
   "login": "Ohto-Ai",
-  "total": 39,
+  "total": 38,
   "featured": [
     {
       "name": "PostLive",
       "desc": "Client for a study live-streaming platform — a student research project",
       "lang": "C++",
       "stars": 9,
-      "year": 2024,
+      "year": 2026,
       "topics": [
-        "client",
-        "live",
+        "desktop-client",
+        "ffmpeg",
+        "live-streaming",
         "qt",
-        "sql"
+        "student-project",
+        "windows"
       ],
       "shot": ""
     },
@@ -32,9 +34,11 @@ window.OhtoRepos = {
       "stars": 5,
       "year": 2023,
       "topics": [
+        "desktop",
         "qt",
         "wallpaper",
-        "wallpaper-engine"
+        "wallpaper-engine",
+        "windows"
       ],
       "shot": ""
     },
@@ -45,8 +49,11 @@ window.OhtoRepos = {
       "stars": 4,
       "year": 2020,
       "topics": [
+        "bitmap",
         "easyx",
-        "nonogram"
+        "generator",
+        "nonogram",
+        "puzzle"
       ],
       "shot": ""
     },
@@ -57,8 +64,12 @@ window.OhtoRepos = {
       "stars": 0,
       "year": 2026,
       "topics": [
+        "cloudflare-d1",
+        "cloudflare-r2",
         "cloudflare-workers",
+        "image-hosting",
         "picbed",
+        "serverless",
         "static-website"
       ],
       "shot": ""
@@ -70,7 +81,11 @@ window.OhtoRepos = {
       "stars": 3,
       "year": 2026,
       "topics": [
+        "cmake",
         "cpp17",
+        "cross-platform",
+        "http",
+        "library",
         "webhook"
       ],
       "shot": ""
@@ -82,11 +97,13 @@ window.OhtoRepos = {
       "stars": 1,
       "year": 2026,
       "topics": [
+        "automation",
         "client-mod",
         "fabric-mod",
         "mc",
         "minecraft",
-        "minecraft-mod"
+        "minecraft-mod",
+        "utility"
       ],
       "shot": ""
     },
@@ -97,32 +114,46 @@ window.OhtoRepos = {
       "stars": 0,
       "year": 2026,
       "topics": [
+        "economy",
         "mc-plugin",
         "mc-server",
-        "shop"
+        "minecraft",
+        "paper-plugin",
+        "playerpoints",
+        "shop",
+        "vault"
       ],
       "shot": ""
     },
     {
       "name": "auto-craft",
-      "desc": "MC Auto Craft",
+      "desc": "A client-side Fabric mod for automated vanilla crafting-station workflows in Minecraft",
       "lang": "Java",
       "stars": 0,
       "year": 2026,
       "topics": [
-        "mod"
+        "autocraft",
+        "client-mod",
+        "crafting",
+        "fabric-mod",
+        "minecraft",
+        "minecraft-mod"
       ],
       "shot": ""
     },
     {
       "name": "MobEditor",
-      "desc": "A Minecraft plugin for editing mobs, written in Kotlin with Gradle.",
+      "desc": "Paper 1.20.6 plugin for editing mobs, equipment, and spawn eggs through an in-game GUI",
       "lang": "Java",
       "stars": 0,
       "year": 2026,
       "topics": [
-        "mc-plugin",
-        "mc-server"
+        "entity",
+        "gui",
+        "minecraft",
+        "mob-editor",
+        "paper-plugin",
+        "spawn-egg"
       ],
       "shot": ""
     },
@@ -132,16 +163,32 @@ window.OhtoRepos = {
       "lang": "Java",
       "stars": 1,
       "year": 2026,
-      "topics": [],
+      "topics": [
+        "anti-cheat",
+        "illegal-items",
+        "minecraft",
+        "nbt",
+        "paper-plugin",
+        "scanner"
+      ],
       "shot": ""
     },
     {
       "name": "SkullShop",
-      "desc": "Minecraft plugin",
+      "desc": "A Paper skull shop plugin with Vault, PlayerPoints, and custom item currencies",
       "lang": "Java",
       "stars": 0,
       "year": 2026,
-      "topics": [],
+      "topics": [
+        "economy",
+        "gui",
+        "minecraft",
+        "paper-plugin",
+        "player-heads",
+        "playerpoints",
+        "shop",
+        "vault"
+      ],
       "shot": ""
     },
     {
@@ -149,13 +196,17 @@ window.OhtoRepos = {
       "desc": "Reveal Hidden Enchantments and Attributes in Tooltips",
       "lang": "Java",
       "stars": 1,
-      "year": 2025,
+      "year": 2026,
       "topics": [
         "enchantments",
+        "fabric-mod",
+        "minecraft",
         "minecraft-mod",
-        "nbt"
+        "nbt",
+        "tooltip"
       ],
       "shot": ""
     }
   ]
-};
+}
+;
