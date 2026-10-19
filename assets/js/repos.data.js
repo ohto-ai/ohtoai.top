@@ -4,10 +4,10 @@
  * 本文件由 .github/workflows/repos.yml 自动生成，请勿手工编辑。
  * 页面把它当普通本地脚本加载，不在运行时调 GitHub API。
  *
- * @generated 2026-10-18T16:30:06Z
+ * @generated 2026-10-19T08:56:28Z
  */
 window.OhtoRepos = {
-  "generated": "2026-10-18",
+  "generated": "2026-10-19",
   "login": "Ohto-Ai",
   "total": 38,
   "featured": [
