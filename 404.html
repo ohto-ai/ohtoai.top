@@ -1,66 +1,377 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>网页不存在</title>
-         <style type="text/css">
-            body {
-                background-color: #0099CC;
-                color: #FFFFFF;
-                font-family: Microsoft Yahei, "Helvetica Neue", Helvetica, Hiragino Sans GB, WenQuanYi Micro Hei, sans-serif;
-                margin-left: 100px;
-            }
-            .face {
-                font-size: 100px;
-            }
-            p{
-                font-size: 24px;
-                padding: 8px;
-                line-height: 40px;
-            }
-            .tips {
-                font-size: 16px
-            }
+<html lang="en">
 
-            /*针对小屏幕的优化*/
-            @media screen and (max-width: 600px) {
-                body{
-                    margin: 0 10px;
-                }
-                p{
-                    font-size: 18px;
-                    line-height: 30px;
-                }
-                .tips {
-                    display: inline-block;
-                    padding-top: 10px;
-                    font-size: 14px;
-                    line-height: 20px;
-                }
+<!--
+    404.html — 新版 404 页
+
+    与主站共用同一套视觉语言（深底 + 蓝图网格 + 噪点 + 漂移柔光、Inter、
+    胶囊按钮、mono 标签），但**完全自包含**：样式全部内联，唯一的站内
+    引用是 Inter 可变字体，并且必须写成绝对路径 ——
+    GitHub Pages 会用 404.html 兜底渲染任意不存在的路径（/foo/bar 也
+    渲染这一份），相对路径在那儿会解析成 /foo/assets/... 直接 404。
+    字体加载失败也不影响：字体栈后面就是系统字体。
+
+    唯一的按钮自带 8 秒倒计时，读秒归零自动回首页；
+    不想等就点它，点击立即回去。
+-->
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#14151A" />
+    <meta name="robots" content="noindex" />
+    <title>404 — Ohto-Ai</title>
+    <meta name="description" content="Page not found." />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+
+    <style>
+        /* ---------------------------------------------------------------------
+           Inter 可变字体（latin 子集 + unicode-range，与 base.css 同款，
+           只是路径改为绝对路径，理由见文件头）。失败时落到系统字体栈。
+           --------------------------------------------------------------------- */
+        @font-face {
+            font-family: "Inter Variable";
+            font-style: normal;
+            font-display: swap;
+            font-weight: 100 900;
+            src: url("/assets/fonts/inter/inter-latin-wght-normal.woff2") format("woff2-variations");
+            unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+                U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122,
+                U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+        }
+
+        /* 设计令牌 —— 从 tokens.css 摘的本页所需子集。
+           主站用 oklch，这里直接给出对应的 hex 兜底值再叠 oklch，
+           单页自包含时不需要整套色阶。 */
+        :root {
+            --bg: #14151A;
+            --bg: oklch(18.5% 0.008 267);
+            --text-primary: #F5F6F9;
+            --text-primary: oklch(97.5% 0.002 267);
+            --text-secondary: #B9BCC7;
+            --text-secondary: oklch(74% 0.006 267);
+            --text-muted: #9397A5;
+            --text-muted: oklch(62% 0.008 267);
+            --accent-fill: #455CE9;
+            --accent-fill: oklch(54.5% 0.203 267);
+            --accent-hover: #6E82F5;
+            --accent-hover: oklch(78% 0.1 267);
+            --accent-text: #6D7DF4;
+            --accent-text: oklch(64.6% 0.172 267);
+            --border: rgba(245, 246, 249, 0.1);
+            --ease: cubic-bezier(0.7, 0, 0.3, 1);
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+            --font-sans:
+                "Inter Variable", "Inter",
+                ui-sans-serif, -apple-system, BlinkMacSystemFont,
+                "Segoe UI Variable Text", "Segoe UI",
+                "PingFang SC", "Hiragino Sans GB",
+                "Microsoft YaHei UI", "Microsoft YaHei",
+                "Source Han Sans SC", "Noto Sans CJK SC", "WenQuanYi Micro Hei",
+                sans-serif;
+            --font-mono:
+                "Inter Variable", "Inter",
+                ui-monospace, "SFMono-Regular", "SF Mono", Menlo, Consolas,
+                "Cascadia Mono", "Liberation Mono",
+                "Microsoft YaHei UI",
+                monospace;
+        }
+
+        *,
+        *::before,
+        *::after { box-sizing: border-box; }
+        * { margin: 0; }
+
+        html {
+            -webkit-text-size-adjust: 100%;
+        }
+
+        body {
+            background-color: #14151A; /* oklch 解析失败时的纯 hex 兜底 */
+            background-color: var(--bg);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            font-size: clamp(0.95rem, 1.05vw, 1.0625rem);
+            line-height: 1.65;
+            min-height: 100vh;
+            min-height: 100svh;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+            display: flex;
+            flex-direction: column;
+        }
+
+        ::selection {
+            background: var(--accent-fill);
+            color: #fff;
+        }
+
+        /* ---------------------------------------------------------------------
+           背景 —— 与主站 .site-bg 同构：漂移柔光 + 蓝图网格 + 点阵 + 噪点。
+           全部内联，零外部请求。
+           --------------------------------------------------------------------- */
+        .bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .bg::before {
+            content: "";
+            position: absolute;
+            inset: -30%;
+            background:
+                radial-gradient(42% 42% at 78% 12%,
+                    rgba(69, 92, 233, 0.16) 0%, transparent 68%),
+                radial-gradient(38% 38% at 12% 82%,
+                    rgba(69, 92, 233, 0.09) 0%, transparent 70%);
+            animation: bg-drift 90s var(--ease) infinite alternate;
+            will-change: transform;
+        }
+
+        @keyframes bg-drift {
+            0%   { transform: translate3d(0, 0, 0) scale(1); }
+            100% { transform: translate3d(-4%, 3%, 0) scale(1.12); }
+        }
+
+        .bg::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            opacity: 0.5;
+            background-image:
+                repeating-linear-gradient(to right,
+                    rgba(245, 246, 249, 0.045) 0 1px, transparent 1px 120px),
+                repeating-linear-gradient(to bottom,
+                    rgba(245, 246, 249, 0.045) 0 1px, transparent 1px 120px),
+                radial-gradient(rgba(245, 246, 249, 0.05) 0.5px, transparent 0.5px),
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+            background-size: 120px 120px, 120px 120px, 24px 24px, 180px 180px;
+        }
+
+        /* ---------------------------------------------------------------------
+           版面
+           --------------------------------------------------------------------- */
+        .nav {
+            position: relative;
+            z-index: 1;
+            padding: clamp(1.25rem, 4vw, 2rem) clamp(1.25rem, 6vw, 6rem);
+        }
+
+        .nav a {
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .nav a:hover { color: var(--accent-hover); }
+
+        .main {
+            position: relative;
+            z-index: 1;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(1.5rem, 6vw, 3rem) clamp(1.25rem, 6vw, 6rem);
+        }
+
+        .wrap {
+            max-width: 40rem;
+            text-align: center;
+        }
+
+        .eyebrow {
+            font-family: var(--font-mono);
+            font-size: 0.6875rem;
+            font-weight: 500;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .code {
+            font-family: var(--font-mono);
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            /* 主站 --fs-hero 的加大版：错误码是这页唯一的"主视觉" */
+            font-size: clamp(6rem, 26vw, 13rem);
+            line-height: 0.95;
+            letter-spacing: -0.04em;
+            margin: 0.5rem 0 1.75rem;
+            background: linear-gradient(180deg,
+                var(--text-primary) 30%,
+                rgba(245, 246, 249, 0.55) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        /* 呼应首屏的 "Make it work; Make it right; Make it fast;" */
+        .statement {
+            font-size: clamp(1rem, 2.2vw, 1.25rem);
+            line-height: 1.9;
+            color: var(--text-muted);
+        }
+
+        .statement em {
+            font-style: normal;
+            color: var(--text-secondary);
+        }
+
+        .statement .punch {
+            color: var(--accent-text);
+        }
+
+        .actions {
+            margin-top: clamp(2.25rem, 6vh, 3.25rem);
+            display: flex;
+            justify-content: center;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.625rem;
+            padding: 0.875rem 1.5rem;
+            border-radius: 999px;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            letter-spacing: 0.01em;
+            text-decoration: none;
+            white-space: nowrap;
+            background: var(--accent-fill);
+            color: #fff;
+            transition: all 0.3s var(--ease);
+        }
+
+        .btn:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn svg { flex-shrink: 0; }
+
+        /* 按钮里的倒计时：细分隔线 + mono 等宽数字，跳动时宽度不抖 */
+        .btn .count {
+            font-family: var(--font-mono);
+            font-variant-numeric: tabular-nums;
+            font-weight: 600;
+            padding-left: 0.625rem;
+            margin-left: 0.125rem;
+            border-left: 1px solid rgba(255, 255, 255, 0.35);
+        }
+
+        .footer {
+            position: relative;
+            z-index: 1;
+            padding: 1.5rem clamp(1.25rem, 6vw, 6rem);
+            text-align: center;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* ---------------------------------------------------------------------
+           入场 —— 一次性、轻量；reduced-motion 下直接呈现
+           --------------------------------------------------------------------- */
+        .wrap > * {
+            opacity: 0;
+            transform: translateY(14px);
+            animation: rise 0.7s var(--ease-out-expo) forwards;
+        }
+
+        .wrap > *:nth-child(2) { animation-delay: 0.08s; }
+        .wrap > *:nth-child(3) { animation-delay: 0.16s; }
+        .wrap > *:nth-child(4) { animation-delay: 0.24s; }
+
+        @keyframes rise {
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
-         </style>
-    </head>
-    <body>
-        <script> 
-            var i = 10; 
-            var intervalid; 
-            intervalid = setInterval("cutdown()", 1000); 
-            function cutdown() { 
-                if (i == 0) { 
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .bg::before { animation: none; }
+            .wrap > * {
+                opacity: 1;
+                transform: none;
+                animation: none;
+            }
+            .btn, .btn:hover { transition: none; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg" aria-hidden="true"></div>
+
+    <header class="nav">
+        <a href="/">Ohto-Ai</a>
+    </header>
+
+    <main class="main">
+        <div class="wrap">
+            <p class="eyebrow">Error · Not Found</p>
+
+            <p class="code" aria-label="404">404</p>
+
+            <p class="statement">
+                <em>Made it work;</em><br />
+                <em>Made it right;</em><br />
+                <em>Made it fast —</em><br />
+                <span class="punch">just not this page.</span>
+            </p>
+
+            <div class="actions">
+                <a class="btn" href="/">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" aria-hidden="true">
+                        <path d="M19 12H5M11 18l-6-6 6-6" />
+                    </svg>
+                    Back to home
+                    <span class="count" id="countdown-n">8</span>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        © <span id="year">2026</span> Ohto-Ai
+    </footer>
+
+    <script>
+        // 按钮里的倒计时：归零自动回首页；点击按钮立即回去（链接原生行为）。
+        // 无 JS 时按钮仍然是正常的回家链接，只是数字停着不走。
+        (function () {
+            "use strict";
+
+            var SECONDS = 8;
+
+            var num = document.getElementById("countdown-n");
+            var year = document.getElementById("year");
+
+            if (year) year.textContent = String(new Date().getFullYear());
+            if (!num) return;
+
+            var left = SECONDS;
+
+            setInterval(function () {
+                left -= 1;
+                if (left <= 0) {
                     window.location.href = "/";
-                    clearInterval(intervalid); 
-                } 
-                document.getElementById("mes").innerHTML = i; 
-                i--; 
-            }
-        window.onload = cutdown;
-        </script>
-        <span class="face">:(</span>
-        <p>您访问的此网页不存在<br>
-            <span id="mes">1</span> 秒后自动跳转至平台首页，您可以在这里试着找找您所需要的信息<br>
-            <span class="tips">如果您想了解更多信息，则可以稍后在线搜索此错误。 <small>算了你还是别搜了…</small></span>
-        </p>
-    </body>
+                    return;
+                }
+                num.textContent = left;
+            }, 1000);
+        })();
+    </script>
+</body>
+
 </html>
