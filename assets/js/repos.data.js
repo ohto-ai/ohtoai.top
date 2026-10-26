@@ -4,18 +4,18 @@
  * 本文件由 .github/workflows/repos.yml 自动生成，请勿手工编辑。
  * 页面把它当普通本地脚本加载，不在运行时调 GitHub API。
  *
- * @generated 2026-10-19T08:56:28Z
+ * @generated 2026-10-26T08:59:03Z
  */
 window.OhtoRepos = {
-  "generated": "2026-10-19",
+  "generated": "2026-10-26",
   "login": "Ohto-Ai",
-  "total": 38,
+  "total": 45,
   "featured": [
     {
       "name": "PostLive",
       "desc": "Client for a study live-streaming platform — a student research project",
       "lang": "C++",
-      "stars": 9,
+      "stars": 10,
       "year": 2026,
       "topics": [
         "desktop-client",
@@ -61,7 +61,7 @@ window.OhtoRepos = {
       "name": "picbed",
       "desc": "A serverless image hosting solution built entirely on Cloudflare's free tier — R2 for storage, D1 for metadata, Workers for logic, and a pure static frontend.",
       "lang": "HTML",
-      "stars": 0,
+      "stars": 1,
       "year": 2026,
       "topics": [
         "cloudflare-d1",
@@ -78,7 +78,7 @@ window.OhtoRepos = {
       "name": "webhook",
       "desc": "a webhook on Linux, Windows and MacOS.",
       "lang": "C++",
-      "stars": 3,
+      "stars": 4,
       "year": 2026,
       "topics": [
         "cmake",
@@ -94,7 +94,7 @@ window.OhtoRepos = {
       "name": "client-tools",
       "desc": "A collection of client-side automation tools.",
       "lang": "Java",
-      "stars": 1,
+      "stars": 2,
       "year": 2026,
       "topics": [
         "automation",
@@ -129,7 +129,7 @@ window.OhtoRepos = {
       "name": "auto-craft",
       "desc": "A client-side Fabric mod for automated vanilla crafting-station workflows in Minecraft",
       "lang": "Java",
-      "stars": 0,
+      "stars": 1,
       "year": 2026,
       "topics": [
         "autocraft",
@@ -145,7 +145,7 @@ window.OhtoRepos = {
       "name": "MobEditor",
       "desc": "Paper 1.20.6 plugin for editing mobs, equipment, and spawn eggs through an in-game GUI",
       "lang": "Java",
-      "stars": 0,
+      "stars": 1,
       "year": 2026,
       "topics": [
         "entity",
@@ -161,7 +161,7 @@ window.OhtoRepos = {
       "name": "illegal-scanner",
       "desc": "Scan illegal, unobtainable or modified items",
       "lang": "Java",
-      "stars": 1,
+      "stars": 2,
       "year": 2026,
       "topics": [
         "anti-cheat",
@@ -177,7 +177,7 @@ window.OhtoRepos = {
       "name": "SkullShop",
       "desc": "A Paper skull shop plugin with Vault, PlayerPoints, and custom item currencies",
       "lang": "Java",
-      "stars": 0,
+      "stars": 1,
       "year": 2026,
       "topics": [
         "economy",
@@ -195,7 +195,7 @@ window.OhtoRepos = {
       "name": "no-hide-flags",
       "desc": "Reveal Hidden Enchantments and Attributes in Tooltips",
       "lang": "Java",
-      "stars": 1,
+      "stars": 2,
       "year": 2026,
       "topics": [
         "enchantments",
