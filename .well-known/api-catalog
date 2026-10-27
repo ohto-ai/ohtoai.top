@@ -1,0 +1,25 @@
+{
+  "linkset": [
+    {
+      "anchor": "https://picbed-worker.ohtoai.top",
+      "service-desc": [
+        {
+          "href": "https://ohtoai.top/doc/picbed.openapi.json",
+          "type": "application/vnd.oai.openapi+json"
+        }
+      ],
+      "service-doc": [
+        {
+          "href": "https://github.com/ohto-ai/picbed",
+          "type": "text/html"
+        }
+      ],
+      "status": [
+        {
+          "href": "https://picbed-worker.ohtoai.top/api/public/images?page=1&pageSize=1",
+          "type": "application/json"
+        }
+      ]
+    }
+  ]
+}

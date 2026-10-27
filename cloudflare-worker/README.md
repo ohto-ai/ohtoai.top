@@ -1,10 +1,15 @@
-# Markdown for Agents — 边缘协商部署
+# Markdown for Agents + API 目录 — 边缘部署
 
-目标：请求带 `Accept: text/markdown` 时返回 `Content-Type: text/markdown`
-的正文（附 `x-markdown-tokens`），其余请求维持 HTML 不变。
+Worker 现在承担两件事：
 
-源站是 GitHub Pages 静态托管，**Accept 头协商只能做在 Cloudflare 边缘**
-（ohtoai.top 已走 Cloudflare 代理）。两条路二选一：
+1. **Markdown for Agents**：请求带 `Accept: text/markdown` 时返回
+   `Content-Type: text/markdown` 的正文（附 `x-markdown-tokens`），其余请求维持 HTML 不变。
+2. **API 目录（RFC 9727）**：`/.well-known/api-catalog` 的 Content-Type 修正为
+   `application/linkset+json` —— GitHub Pages 对无扩展名文件只能返回
+   `application/octet-stream`，这个头只能在边缘改。
+
+源站是 GitHub Pages 静态托管，以上都做不了，只能在 Cloudflare 边缘补
+（ohtoai.top 已走 Cloudflare 代理）。
 
 ## 方案 A（推荐，零代码）：开启 Cloudflare Beta 开关
 
@@ -20,6 +25,8 @@ Cloudflare 官方的 [Markdown for Agents](https://developers.cloudflare.com/fun
    # 期望：content-type: text/markdown 且 body 为 Markdown
    ```
    （Beta 功能的可见性与套餐有关；如果面板里没有这个开关，用方案 B。）
+   注意：即使开了 Beta 开关，`/.well-known/api-catalog` 的头修正仍需要
+   本 Worker 或一条 Transform Rule（响应头改写）。
 
 ## 方案 B：部署本目录的 Worker
 

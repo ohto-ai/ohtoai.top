@@ -1,0 +1,319 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "picbed API",
+    "summary": "ohtoai.top 图床（R2 + D1 + Workers）",
+    "description": "ohtoai.top 自托管图床的后端 API。图片字节走 R2 自定义域名直出（img.ohtoai.top），本 API 只处理元数据与上传管理，部署在 picbed-worker.ohtoai.top。源码与部署文档见 https://github.com/ohto-ai/picbed 。未配置服务端密码时管理接口一律返回 503（fail closed）。",
+    "version": "1.0.0"
+  },
+  "servers": [
+    { "url": "https://picbed-worker.ohtoai.top" }
+  ],
+  "security": [
+    { "picbedKey": [] }
+  ],
+  "tags": [
+    { "name": "public", "description": "公开接口（无需鉴权，带 CORS）" },
+    { "name": "images", "description": "图片元数据管理（需鉴权）" },
+    { "name": "albums", "description": "相册管理（需鉴权）" }
+  ],
+  "paths": {
+    "/api/public/images": {
+      "get": {
+        "tags": ["public"],
+        "summary": "相册列表（公开）",
+        "description": "只返回可陈列的图片（is_hidden=false 且 rating 可陈列）。带 CORS。",
+        "security": [],
+        "parameters": [
+          { "name": "album", "in": "query", "schema": { "type": "string" }, "description": "按相册筛选，空串表示根目录" },
+          { "name": "rating", "in": "query", "schema": { "type": "string" }, "description": "按分级筛选" },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "pageSize", "in": "query", "schema": { "type": "integer", "default": 50 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "分页的图片元数据与相册目录",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "total": { "type": "integer" },
+                    "page": { "type": "integer" },
+                    "pageSize": { "type": "integer" },
+                    "rating": { "type": "string" },
+                    "album": { "type": "string" },
+                    "folders": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "album": { "type": "string" },
+                          "n": { "type": "integer" }
+                        }
+                      }
+                    },
+                    "images": { "type": "array", "items": { "type": "object", "additionalProperties": true } }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/upload": {
+      "post": {
+        "tags": ["images"],
+        "summary": "上传图片",
+        "description": "请求体为裸图片字节（不是 multipart）。文件名放 X-Filename 头（非 ASCII 需 URL 编码）。相册与分级走 query 参数，空串 album 表示根目录。",
+        "parameters": [
+          { "name": "album", "in": "query", "schema": { "type": "string" }, "description": "目标相册，空串为根目录" },
+          { "name": "rating", "in": "query", "schema": { "type": "string" }, "description": "内容分级" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "image/jpeg": { "schema": { "type": "string", "format": "binary" } },
+            "image/png": { "schema": { "type": "string", "format": "binary" } },
+            "image/webp": { "schema": { "type": "string", "format": "binary" } },
+            "image/gif": { "schema": { "type": "string", "format": "binary" } },
+            "application/octet-stream": { "schema": { "type": "string", "format": "binary" } }
+          }
+        },
+        "responses": {
+          "200": { "description": "上传成功，返回图片键与直链", "content": { "application/json": { "schema": { "type": "object", "additionalProperties": true } } } },
+          "400": { "description": "请求不合法", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "403": { "description": "密码错误（x-picbed-key 不匹配）", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "503": { "description": "服务端未设置 PICBED_PASSWORD，管理接口停用（fail closed）", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/api/images": {
+      "get": {
+        "tags": ["images"],
+        "summary": "管理列表（含隐藏与 unspecified）",
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "pageSize", "in": "query", "schema": { "type": "integer" } },
+          { "name": "rating", "in": "query", "schema": { "type": "string" } },
+          { "name": "hidden", "in": "query", "schema": { "type": "string" } },
+          { "name": "q", "in": "query", "schema": { "type": "string" }, "description": "按文件名搜索" },
+          { "name": "album", "in": "query", "schema": { "type": "string" }, "description": "带 album（哪怕空串）就精确筛该相册；不传才是不筛" },
+          { "name": "thumb", "in": "query", "schema": { "type": "string", "enum": ["missing"] }, "description": "只列还没有缩略图的（批量补全用）" }
+        ],
+        "responses": {
+          "200": { "description": "分页图片列表", "content": { "application/json": { "schema": { "type": "object", "additionalProperties": true } } } },
+          "403": { "description": "密码错误", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "503": { "description": "管理接口停用（fail closed）", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/api/images/{id}": {
+      "parameters": [
+        { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+      ],
+      "patch": {
+        "tags": ["images"],
+        "summary": "修改图片元数据",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "is_hidden": { "type": "boolean" },
+                  "rating": { "type": "string" },
+                  "album": { "type": "string" },
+                  "filename": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "已更新", "content": { "application/json": { "schema": { "type": "object", "additionalProperties": true } } } },
+          "403": { "description": "密码错误", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "503": { "description": "管理接口停用（fail closed）", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "delete": {
+        "tags": ["images"],
+        "summary": "删除图片",
+        "description": "同时删除 R2 对象（原图 + 缩略图）与 D1 记录。",
+        "responses": {
+          "200": { "description": "已删除", "content": { "application/json": { "schema": { "type": "object", "additionalProperties": true } } } },
+          "403": { "description": "密码错误", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "503": { "description": "管理接口停用（fail closed）", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/api/images/{id}/thumb": {
+      "put": {
+        "tags": ["images"],
+        "summary": "上传浏览器生成的缩略图",
+        "description": "请求体为图片字节，Content-Type 决定扩展名；存储键由服务端从原图键推导。",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "image/webp": { "schema": { "type": "string", "format": "binary" } },
+            "image/jpeg": { "schema": { "type": "string", "format": "binary" } },
+            "image/png": { "schema": { "type": "string", "format": "binary" } }
+          }
+        },
+        "responses": {
+          "200": { "description": "已写入", "content": { "application/json": { "schema": { "type": "object", "additionalProperties": true } } } },
+          "403": { "description": "密码错误", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "503": { "description": "管理接口停用（fail closed）", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/api/images/bulk": {
+      "post": {
+        "tags": ["images"],
+        "summary": "批量修改或删除",
+        "description": "单次最多 500 条。删除模式：{ids, delete:true}。",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ids": { "type": "array", "items": { "type": "string" }, "maxItems": 500 },
+                  "is_hidden": { "type": "boolean" },
+                  "rating": { "type": "string" },
+                  "album": { "type": "string" },
+                  "filename": { "type": "string" },
+                  "delete": { "type": "boolean" }
+                },
+                "required": ["ids"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "已处理", "content": { "application/json": { "schema": { "type": "object", "additionalProperties": true } } } },
+          "400": { "description": "请求不合法", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "403": { "description": "密码错误", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "503": { "description": "管理接口停用（fail closed）", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/api/albums": {
+      "get": {
+        "tags": ["albums"],
+        "summary": "相册名列表（管理页筛选用）",
+        "responses": {
+          "200": { "description": "相册名列表", "content": { "application/json": { "schema": { "type": "object", "additionalProperties": true } } } },
+          "403": { "description": "密码错误", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "503": { "description": "管理接口停用（fail closed）", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "delete": {
+        "tags": ["albums"],
+        "summary": "删除整个相册子树",
+        "description": "删除记录与对应 R2 对象。",
+        "parameters": [
+          { "name": "album", "in": "query", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "已删除", "content": { "application/json": { "schema": { "type": "object", "additionalProperties": true } } } },
+          "403": { "description": "密码错误", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "503": { "description": "管理接口停用（fail closed）", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/api/albums/stats": {
+      "get": {
+        "tags": ["albums"],
+        "summary": "删除前统计",
+        "description": "返回该相册子树的图片数 / 子相册数 / 字节数。",
+        "parameters": [
+          { "name": "album", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "统计结果", "content": { "application/json": { "schema": { "type": "object", "additionalProperties": true } } } },
+          "403": { "description": "密码错误", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "503": { "description": "管理接口停用（fail closed）", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/api/albums/rename": {
+      "post": {
+        "tags": ["albums"],
+        "summary": "重命名/移动相册",
+        "description": "整棵相册子树（含子相册）改名或移动，一条 UPDATE 完成。",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "from": { "type": "string" },
+                  "to": { "type": "string" }
+                },
+                "required": ["from", "to"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "已完成", "content": { "application/json": { "schema": { "type": "object", "additionalProperties": true } } } },
+          "403": { "description": "密码错误", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "503": { "description": "管理接口停用（fail closed）", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/api/transfer": {
+      "post": {
+        "tags": ["images"],
+        "summary": "抓取远程图片转存",
+        "description": "按 URL 抓取图片并写入 R2。50MB 上限、15 秒超时。",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "url": { "type": "string", "format": "uri" }
+                },
+                "required": ["url"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "转存成功", "content": { "application/json": { "schema": { "type": "object", "additionalProperties": true } } } },
+          "400": { "description": "请求不合法或超出限制", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "403": { "description": "密码错误", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "503": { "description": "管理接口停用（fail closed）", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "picbedKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-picbed-key",
+        "description": "管理密码，与服务端环境变量 PICBED_PASSWORD 比对。公开接口无需此头。"
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": { "type": "string" }
+        }
+      }
+    }
+  }
+}

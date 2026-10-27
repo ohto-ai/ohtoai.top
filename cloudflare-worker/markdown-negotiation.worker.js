@@ -1,19 +1,25 @@
 /**
- * markdown-negotiation.worker.js — Markdown for Agents 边缘协商
+ * markdown-negotiation.worker.js — Markdown for Agents 边缘协商 + API 目录修正
  *
- * ohtoai.top 是 GitHub Pages 静态源站，无法在源站做 Accept 头协商。
- * 本 Worker 部署在 Cloudflare（route: ohtoai.top/*）后补上这一层：
+ * ohtoai.top 是 GitHub Pages 静态源站，无法在源站做 Accept 头协商，
+ * 也无法为无扩展名文件指定 Content-Type。本 Worker 部署在 Cloudflare
+ * （route: ohtoai.top/*）后补上这两层：
  *
  *   · 请求带 Accept: text/markdown  → 回源取 HTML，边缘转成 Markdown，
  *     以 text/markdown 返回，附 x-markdown-tokens（粗估 token 数）
+ *   · 请求 /.well-known/api-catalog → 透传响应但把 Content-Type 修正为
+ *     application/linkset+json（RFC 9727 要求；源站对无扩展名文件只能
+ *     给 application/octet-stream）
  *   · 其余请求                      → 原样透传，浏览器行为不变
  *
  * 部署方式见同目录 README.md。
  * 注意：若改用 Cloudflare 仪表盘的「Markdown for Agents」Beta 开关，
- * 本 Worker 即属多余，二选一即可。
+ * Markdown 部分即属多余；api-catalog 的头修正仍需要本 Worker（或一条
+ * Transform Rule）。
  */
 
 const MD_TYPES = /text\/markdown/i;
+const API_CATALOG_PATH = "/.well-known/api-catalog";
 
 /** 不采集正文的结构性元素 */
 const SKIP_SELECTOR = "head, script, style, svg, noscript, nav, footer, template, form";
@@ -21,6 +27,19 @@ const SKIP_SELECTOR = "head, script, style, svg, noscript, nav, footer, template
 export default {
   async fetch(request) {
     const accept = request.headers.get("accept") || "";
+    const { pathname } = new URL(request.url);
+
+    // RFC 9727 API 目录：修正 Content-Type 后透传
+    if (pathname === API_CATALOG_PATH) {
+      const upstream = await fetch(request);
+      const headers = new Headers(upstream.headers);
+      headers.set("content-type", "application/linkset+json");
+      headers.set("vary", "accept");
+      return new Response(upstream.body, {
+        status: upstream.status,
+        headers,
+      });
+    }
 
     // 普通浏览器/爬虫：原样透传，一行不多管
     if (!MD_TYPES.test(accept)) {
