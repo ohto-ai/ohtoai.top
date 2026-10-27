@@ -88,21 +88,27 @@ export default {
       return new Response(upstream.body, upstream);
     }
 
-    const markdown = await htmlToMarkdown(upstream, url);
-    // 粗估：英文语料约 4 字符 ≈ 1 token
-    const tokens = Math.ceil(markdown.length / 4);
+    // 转换失败绝不能把站点打挂 —— 降级为返回原 HTML（带 Link 头）
+    try {
+      const markdown = await htmlToMarkdown(upstream, url);
+      // 粗估：英文语料约 4 字符 ≈ 1 token
+      const tokens = Math.ceil(markdown.length / 4);
 
-    const headers = new Headers({
-      "content-type": "text/markdown; charset=utf-8",
-      "x-markdown-tokens": String(tokens),
-      // 缓存必须区分 HTML / Markdown 两个变体
-      vary: "accept",
-      "cache-control": "no-store",
-    });
-    for (const link of LINK_HEADERS) {
-      headers.append("link", link);
+      const headers = new Headers({
+        "content-type": "text/markdown; charset=utf-8",
+        "x-markdown-tokens": String(tokens),
+        // 缓存必须区分 HTML / Markdown 两个变体
+        vary: "accept",
+        "cache-control": "no-store",
+      });
+      for (const link of LINK_HEADERS) {
+        headers.append("link", link);
+      }
+      return new Response(markdown, { status: 200, headers });
+    } catch (e) {
+      console.error("markdown conversion failed:", e);
+      return withLinkHeaders(upstream);
     }
-    return new Response(markdown, { status: 200, headers });
   },
 };
 
@@ -248,9 +254,10 @@ function htmlToMarkdown(response, baseUrl) {
         },
       });
 
+    // transform() 返回 Response，流在 .body 上
     rewriter
       .transform(response)
-      .pipeTo(
+      .body.pipeTo(
         new WritableStream({
           write() {},
           close() {
