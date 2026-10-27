@@ -1,6 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  sitemap.xml — https://ohtoai.top 的公开页面清单（Sitemaps 协议 0.9）。
+
+  维护约定：发布或下线页面时同步增删这里的 <url> 条目，
+  并用 git log -1 --format=%as -- <path> 更新对应 <lastmod>。
+  robots.txt 里引用了本文件，不要改名或移动。
+-->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://ohtoai.top/</loc>
+    <lastmod>2026-10-24</lastmod>
+  </url>
+  <url>
+    <loc>https://ohtoai.top/2020/</loc>
+    <lastmod>2026-10-19</lastmod>
+  </url>
+  <url>
+    <loc>https://ohtoai.top/doc/API_Design_Principles.html</loc>
+    <lastmod>2021-09-20</lastmod>
+  </url>
+  <url>
+    <loc>https://ohtoai.top/doc/learn-regex.html</loc>
+    <lastmod>2021-12-31</lastmod>
+  </url>
+  <url>
+    <loc>https://ohtoai.top/lab/music/</loc>
+    <lastmod>2022-09-22</lastmod>
   </url>
 </urlset>
