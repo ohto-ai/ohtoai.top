@@ -1,6 +1,7 @@
 # robots.txt — https://ohtoai.top
 # 全站策略：公开内容一律允许抓取，仅排除 404 兜底页（页面本身也带 noindex）。
 # AI 爬虫在此显式列出，便于日后按家族单独调整而不必动通配组。
+# Content-Signal 声明内容使用偏好（contentsignals.org），与上方爬虫规则保持一致。
 
 # AI 搜索爬虫 —— 决定本站是否出现在 AI 助手的回答里，保持开放
 User-agent: OAI-SearchBot
@@ -31,5 +32,6 @@ Disallow: /404.html
 User-agent: *
 Allow: /
 Disallow: /404.html
+Content-Signal: search=yes, ai-train=yes, ai-input=yes
 
 Sitemap: https://ohtoai.top/sitemap.xml
