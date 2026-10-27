@@ -1,0 +1,7 @@
+# robots.txt — https://ohtoai.top
+# 所有爬虫：整站允许抓取，仅排除 404 兜底页（页面本身也带 noindex）。
+User-agent: *
+Allow: /
+Disallow: /404.html
+
+Sitemap: https://ohtoai.top/sitemap.xml
