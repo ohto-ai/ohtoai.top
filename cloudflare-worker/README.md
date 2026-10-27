@@ -44,6 +44,22 @@ Worker 说明：非 markdown 请求原样透传（对站点零侵入）；回源
 `Accept: text/html` 防止回环；HTML→Markdown 用 HTMLRewriter 流式转换，
 覆盖标题/段落/链接/列表/强调/图片/代码/表格单元格。
 
+## 方案 C（不用 Worker）：Transform Rule 加 Link 头
+
+只想补 Link 头、不想部署 Worker 的话：Cloudflare → Rules → Transform Rules →
+**Response Header Modification** → Set static header：
+
+- 规则表达式：`(http.host eq "ohtoai.top") and starts_with(http.request.uri.path, "/")`
+  （或只在 `http.request.uri.path eq "/"` 上加，更保守）
+- Header name：`Link`
+- Header value（一行，逗号分隔，RFC 8288 允许）：
+
+```
+</.well-known/api-catalog>; rel="api-catalog", </doc/picbed.openapi.json>; rel="service-desc"; type="application/vnd.oai.openapi+json", <https://github.com/ohto-ai/picbed>; rel="service-doc"; type="text/html", </doc/site.jsonld>; rel="describedby"; type="application/ld+json", </index.md>; rel="alternate"; type="text/markdown"
+```
+
+Markdown 协商和 api-catalog 的 Content-Type 修正仍需要方案 A/B。
+
 ## 仓库侧已就位的部分（与边缘方案互补）
 
 - `/index.md` —— 首页的静态 Markdown 表示，手工与 index.html 同步维护
