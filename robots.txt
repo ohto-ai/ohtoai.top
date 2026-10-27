@@ -1,5 +1,33 @@
 # robots.txt — https://ohtoai.top
-# 所有爬虫：整站允许抓取，仅排除 404 兜底页（页面本身也带 noindex）。
+# 全站策略：公开内容一律允许抓取，仅排除 404 兜底页（页面本身也带 noindex）。
+# AI 爬虫在此显式列出，便于日后按家族单独调整而不必动通配组。
+
+# AI 搜索爬虫 —— 决定本站是否出现在 AI 助手的回答里，保持开放
+User-agent: OAI-SearchBot
+User-agent: Claude-SearchBot
+User-agent: PerplexityBot
+Allow: /
+Disallow: /404.html
+
+# AI 训练爬虫 —— 沿用全站开放策略；如需退出训练语料，把这组改成 Disallow: /
+User-agent: GPTBot
+User-agent: ClaudeBot
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+User-agent: CCBot
+User-agent: Bytespider
+User-agent: Amazonbot
+Allow: /
+Disallow: /404.html
+
+# 用户触发型抓取（用户主动让 AI 读某个页面）—— 开放
+User-agent: ChatGPT-User
+User-agent: Claude-User
+User-agent: Perplexity-User
+Allow: /
+Disallow: /404.html
+
+# 其余所有爬虫
 User-agent: *
 Allow: /
 Disallow: /404.html
