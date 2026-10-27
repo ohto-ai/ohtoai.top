@@ -50,8 +50,10 @@ function withLinkHeaders(response) {
     });
 }
 
-/** 不采集正文的结构性元素 */
-const SKIP_SELECTOR = "head, script, style, svg, noscript, nav, footer, template, form";
+/** 不采集正文的结构性元素（标签级 + CSS 隐藏的界面件） */
+const SKIP_SELECTOR =
+    "head, script, style, svg, noscript, nav, footer, template, form, " +
+    ".preloader, .site-nav, .site-bg, .skip-link";
 
 export default {
   async fetch(request) {
