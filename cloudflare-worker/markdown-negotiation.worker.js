@@ -1,25 +1,54 @@
 /**
- * markdown-negotiation.worker.js — Markdown for Agents 边缘协商 + API 目录修正
+ * markdown-negotiation.worker.js — 面向 Agent 的边缘增强
  *
- * ohtoai.top 是 GitHub Pages 静态源站，无法在源站做 Accept 头协商，
- * 也无法为无扩展名文件指定 Content-Type。本 Worker 部署在 Cloudflare
- * （route: ohtoai.top/*）后补上这两层：
+ * ohtoai.top 是 GitHub Pages 静态源站，无法在源站做 Accept 头协商、
+ * 为无扩展名文件指定 Content-Type，或添加自定义响应头。
+ * 本 Worker 部署在 Cloudflare（route: ohtoai.top/*）后补上这三层：
  *
  *   · 请求带 Accept: text/markdown  → 回源取 HTML，边缘转成 Markdown，
  *     以 text/markdown 返回，附 x-markdown-tokens（粗估 token 数）
  *   · 请求 /.well-known/api-catalog → 透传响应但把 Content-Type 修正为
  *     application/linkset+json（RFC 9727 要求；源站对无扩展名文件只能
  *     给 application/octet-stream）
+ *   · HTML 响应（含 Markdown 转换结果）统一追加 RFC 8288 / RFC 9727 §3
+ *     的 Link 响应头（api-catalog / service-desc / service-doc /
+ *     describedby / alternate）
  *   · 其余请求                      → 原样透传，浏览器行为不变
  *
  * 部署方式见同目录 README.md。
  * 注意：若改用 Cloudflare 仪表盘的「Markdown for Agents」Beta 开关，
- * Markdown 部分即属多余；api-catalog 的头修正仍需要本 Worker（或一条
- * Transform Rule）。
+ * Markdown 部分即属多余；api-catalog 的头修正与 Link 头仍需要本
+ * Worker（或等价的 Transform Rule）。
  */
 
 const MD_TYPES = /text\/markdown/i;
 const API_CATALOG_PATH = "/.well-known/api-catalog";
+
+/** RFC 8288 / RFC 9727 §3 —— HTML 与 Markdown 响应统一携带的 Link 头 */
+const LINK_HEADERS = [
+    '</.well-known/api-catalog>; rel="api-catalog"',
+    '</doc/picbed.openapi.json>; rel="service-desc"; type="application/vnd.oai.openapi+json"',
+    '<https://github.com/ohto-ai/picbed>; rel="service-doc"; type="text/html"',
+    '</doc/site.jsonld>; rel="describedby"; type="application/ld+json"',
+    '</index.md>; rel="alternate"; type="text/markdown"',
+];
+
+/** 给响应追加 Link 头（保留已有的）；非 HTML/Markdown 响应原样返回 */
+function withLinkHeaders(response) {
+    const ctype = (response.headers.get("content-type") || "").toLowerCase();
+    if (!ctype.includes("text/html") && !ctype.includes("text/markdown")) {
+        return response;
+    }
+    const headers = new Headers(response.headers);
+    for (const link of LINK_HEADERS) {
+        headers.append("link", link);
+    }
+    return new Response(response.body, {
+        status: response.status,
+        statusText: response.statusText,
+        headers,
+    });
+}
 
 /** 不采集正文的结构性元素 */
 const SKIP_SELECTOR = "head, script, style, svg, noscript, nav, footer, template, form";
@@ -41,9 +70,9 @@ export default {
       });
     }
 
-    // 普通浏览器/爬虫：原样透传，一行不多管
+    // 普通浏览器/爬虫：透传并补上 Link 头
     if (!MD_TYPES.test(accept)) {
-      return fetch(request);
+      return withLinkHeaders(await fetch(request));
     }
 
     const url = new URL(request.url);
@@ -63,16 +92,17 @@ export default {
     // 粗估：英文语料约 4 字符 ≈ 1 token
     const tokens = Math.ceil(markdown.length / 4);
 
-    return new Response(markdown, {
-      status: 200,
-      headers: {
-        "content-type": "text/markdown; charset=utf-8",
-        "x-markdown-tokens": String(tokens),
-        // 缓存必须区分 HTML / Markdown 两个变体
-        vary: "accept",
-        "cache-control": "no-store",
-      },
+    const headers = new Headers({
+      "content-type": "text/markdown; charset=utf-8",
+      "x-markdown-tokens": String(tokens),
+      // 缓存必须区分 HTML / Markdown 两个变体
+      vary: "accept",
+      "cache-control": "no-store",
     });
+    for (const link of LINK_HEADERS) {
+      headers.append("link", link);
+    }
+    return new Response(markdown, { status: 200, headers });
   },
 };
 

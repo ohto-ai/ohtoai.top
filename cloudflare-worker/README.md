@@ -1,12 +1,16 @@
-# Markdown for Agents + API 目录 — 边缘部署
+# 面向 Agent 的边缘增强 — 部署说明
 
-Worker 现在承担两件事：
+Worker 现在承担三件事：
 
 1. **Markdown for Agents**：请求带 `Accept: text/markdown` 时返回
    `Content-Type: text/markdown` 的正文（附 `x-markdown-tokens`），其余请求维持 HTML 不变。
 2. **API 目录（RFC 9727）**：`/.well-known/api-catalog` 的 Content-Type 修正为
    `application/linkset+json` —— GitHub Pages 对无扩展名文件只能返回
    `application/octet-stream`，这个头只能在边缘改。
+3. **Link 响应头（RFC 8288 / RFC 9727 §3）**：所有 HTML 响应（含 Markdown
+   转换结果）追加 `api-catalog` / `service-desc` / `service-doc` /
+   `describedby` / `alternate` 的 Link 头 —— 源站（GitHub Pages）无法
+   自定义响应头，同样只能在边缘加。
 
 源站是 GitHub Pages 静态托管，以上都做不了，只能在 Cloudflare 边缘补
 （ohtoai.top 已走 Cloudflare 代理）。

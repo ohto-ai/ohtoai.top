@@ -110,6 +110,10 @@
          静态源站做不了 Accept 头协商，Agent 可经此发现 /index.md；
          边缘层的完整协商见 cloudflare-worker/。 -->
     <link rel="alternate" type="text/markdown" href="/index.md" />
+    <!-- 机器可读资源：API 目录（RFC 9727）与站点描述（schema.org JSON-LD）。
+         对应的 Link 响应头由边缘 Worker 注入，见 cloudflare-worker/。 -->
+    <link rel="api-catalog" href="/.well-known/api-catalog" />
+    <link rel="describedby" type="application/ld+json" href="/doc/site.jsonld" />
 
     <!-- ======================================================================
          内联兜底

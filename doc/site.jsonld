@@ -1,0 +1,32 @@
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Person",
+      "@id": "https://ohtoai.top/#person",
+      "name": "Choo",
+      "alternateName": "Ohto-Ai",
+      "url": "https://ohtoai.top/",
+      "email": "mailto:me@ohtoai.top",
+      "jobTitle": "C++ Software Engineer",
+      "description": "I build low-level tools, cross-platform utilities, and Minecraft plugins.",
+      "knowsAbout": ["C++", "Rust", "Minecraft plugins"],
+      "sameAs": [
+        "https://github.com/Ohto-Ai",
+        "https://space.bilibili.com/36225088",
+        "https://www.cnblogs.com/that-boy",
+        "https://blog.csdn.net/qq_29091587",
+        "https://steamcommunity.com/id/OhtoAi-02"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://ohtoai.top/#website",
+      "url": "https://ohtoai.top/",
+      "name": "Ohto-Ai",
+      "description": "Ohto-Ai, C++ developer. Make it work; Make it right; Make it fast;",
+      "inLanguage": "en",
+      "publisher": { "@id": "https://ohtoai.top/#person" }
+    }
+  ]
+}
