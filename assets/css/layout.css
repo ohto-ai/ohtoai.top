@@ -719,9 +719,39 @@ html.js .site-nav[data-scrolled] {
     position: relative;
     z-index: var(--z-content);
     border-top: 1px solid var(--border);
-    padding-block: 2rem;
+    /* 上方留出台词带的空间，小字贴底 */
+    padding-block: clamp(7.5rem, 18vh, 12rem) 2rem;
     font-size: var(--fs-small);
     color: var(--text-muted);
+}
+
+/* 结尾台词：《奇蛋物语》终章，大户爱。
+   独占页脚上方的台词带 —— 大、浅、两侧渐隐，装饰不参与读屏与交互。 */
+.site-footer__quote {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: clamp(1.25rem, 3vh, 2.25rem);
+    margin: 0;
+    text-align: center;
+    white-space: nowrap;
+    line-height: 1.15;
+    /* 20 个全角字符：4.3vw 时约 84vw 宽，宽屏留出渐隐边距、窄屏不换行 */
+    font-size: clamp(1rem, 4.3vw, 4.6rem);
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    color: oklch(97.5% 0.002 var(--base-hue) / 0.09);
+    -webkit-mask-image: linear-gradient(to right,
+            transparent, #000 18%, #000 82%, transparent);
+    mask-image: linear-gradient(to right,
+            transparent, #000 18%, #000 82%, transparent);
+    pointer-events: none;
+    user-select: none;
+}
+
+/* 页脚文字压在水印之上 */
+.site-footer .container {
+    position: relative;
 }
 
 .site-footer__row {
