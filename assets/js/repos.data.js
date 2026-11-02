@@ -4,12 +4,12 @@
  * 本文件由 .github/workflows/repos.yml 自动生成，请勿手工编辑。
  * 页面把它当普通本地脚本加载，不在运行时调 GitHub API。
  *
- * @generated 2026-10-26T08:59:03Z
+ * @generated 2026-11-02T11:13:01Z
  */
 window.OhtoRepos = {
-  "generated": "2026-10-26",
+  "generated": "2026-11-02",
   "login": "Ohto-Ai",
-  "total": 45,
+  "total": 47,
   "featured": [
     {
       "name": "PostLive",
