@@ -270,11 +270,11 @@
 
                 <div class="hero__copy">
                     <div class="hero__chip reveal">
-                        <!-- 头像取自 me@ohtoai.top 的 Gravatar。静态 src 指向国内镜像 loli
-                             （v2ex 镜像 2026-10 起对图片请求挂 CF 挑战页，见 avatar.js）；
-                             镜像不可用时由 avatar.js 依次接力其他 CDN、GitHub 和本地文件。 -->
+                        <!-- 头像：本地文件即显（同源必成，硬刷新-proof），
+                             avatar.js 后台预载 Gravatar 高清镜像、成功才无缝升级。
+                             之前指向 CDN 的做法被实测拖出过 50s+ 的加载悬挂。 -->
                         <img class="hero__avatar" id="hero-avatar"
-                            src="https://gravatar.loli.net/avatar/6a04c274eb3d604821b4917304f0e7ae?s=320&amp;d=404"
+                            src="assets/img/avatar.png"
                             alt="Ohto-Ai" width="52" height="52" decoding="async"
                             referrerpolicy="no-referrer" />
                         <span class="eyebrow">C++ Software Engineer</span>
