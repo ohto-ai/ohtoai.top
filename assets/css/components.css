@@ -686,3 +686,176 @@
         display: none;
     }
 }
+
+/* --------------------------------------------------------------------------
+   背景音乐开关（bgm.js）
+   左下角圆形按钮；无 JS 时整体隐藏，播放时音符缓转。
+   -------------------------------------------------------------------------- */
+html:not(.js) .bgm {
+    display: none;
+}
+
+.bgm__toggle {
+    position: fixed;
+    left: clamp(0.9rem, 2vw, 1.5rem);
+    bottom: clamp(0.9rem, 2vw, 1.5rem);
+    z-index: 90; /* 导航(100)之下，内容之上 */
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border-strong);
+    background: oklch(22.5% 0.01 var(--base-hue) / 0.72);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: var(--animation-fast);
+}
+
+.bgm__toggle:hover {
+    color: var(--text-primary);
+    border-color: var(--text-muted);
+    transform: translateY(-2px);
+}
+
+.bgm__toggle:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+}
+
+.bgm__toggle.is-playing {
+    color: var(--accent-text, var(--accent));
+    border-color: oklch(64.6% 0.172 var(--base-hue) / 0.55);
+}
+
+.bgm__icon {
+    display: block;
+}
+
+.bgm__toggle.is-playing .bgm__icon {
+    animation: bgm-spin 5s linear infinite;
+}
+
+@keyframes bgm-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .bgm__toggle,
+    .bgm__toggle:hover {
+        transition: none;
+    }
+
+    .bgm__toggle.is-playing .bgm__icon {
+        animation: none;
+    }
+}
+
+/* 右键展开的控制面板：播放/暂停 + 音量。
+   [hidden] 控制开关，出现时从左下轻轻浮起。 */
+.bgm__panel {
+    position: fixed;
+    z-index: 90;
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.65rem 0.9rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-strong);
+    background: oklch(22.5% 0.01 var(--base-hue) / 0.85);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 28px oklch(10% 0.01 var(--base-hue) / 0.45);
+    animation: bgm-panel-in 0.22s var(--ease-out-expo);
+}
+
+.bgm__panel[hidden] {
+    display: none;
+}
+
+@keyframes bgm-panel-in {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.bgm__play {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border-strong);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: var(--animation-fast);
+}
+
+/* 播放/暂停图标按状态切换 */
+.bgm__play .bgm__icon-pause {
+    display: none;
+}
+
+.bgm__play[aria-pressed="true"] .bgm__icon-pause {
+    display: block;
+}
+
+.bgm__play[aria-pressed="true"] .bgm__icon-play {
+    display: none;
+}
+
+.bgm__play svg {
+    display: block;
+}
+
+.bgm__play:hover {
+    color: var(--text-primary);
+    border-color: var(--text-muted);
+}
+
+.bgm__play[aria-pressed="true"] {
+    background: var(--accent-fill);
+    border-color: transparent;
+    color: #fff;
+}
+
+.bgm__vol {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    color: var(--text-muted);
+}
+
+.bgm__vol input[type="range"] {
+    width: 7.5rem;
+    accent-color: var(--accent-fill);
+    cursor: pointer;
+}
+
+.bgm__vol-label {
+    min-width: 2.6em;
+    text-align: right;
+    font-size: var(--fs-small);
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .bgm__panel {
+        animation: none;
+    }
+
+    .bgm__play {
+        transition: none;
+    }
+}

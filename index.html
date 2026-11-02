@@ -513,6 +513,49 @@
         </div>
     </footer>
 
+    <!-- 背景音乐：HOYO-MiX《风息的离别诗》整曲（175s，Opus mono 24k ≈ 616KB，
+         AAC 40k 兜底 Safari）。浏览器禁止有声自动播放，默认关闭，点左下角
+         开关开启；上次开着走的话本次首次交互自动续上。曲子开头极轻、结尾
+         自然淡出，整曲循环的接缝无需额外处理。 -->
+    <div class="bgm" id="bgm">
+        <audio id="bgm-audio" loop preload="none">
+            <source src="assets/music/zeitlind-full.webm" type="audio/webm; codecs=opus" />
+            <source src="assets/music/zeitlind-full.m4a" type="audio/mp4" />
+        </audio>
+        <button class="bgm__toggle" id="bgm-toggle" type="button" aria-pressed="false"
+            aria-label="Play background music" title="Background music">
+            <svg class="bgm__icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                stroke-linejoin="round" aria-hidden="true">
+                <path d="M9 18V5l10-2v13" />
+                <circle cx="6.5" cy="18" r="2.5" />
+                <circle cx="16.5" cy="16" r="2.5" />
+            </svg>
+        </button>
+        <!-- 右键开关展开的小控制面板：播放/暂停 + 音量（bgm.js 定位与开关） -->
+        <div class="bgm__panel" id="bgm-panel" role="group" aria-label="Background music controls"
+            hidden>
+            <button class="bgm__play" id="bgm-play" type="button" aria-pressed="false"
+                aria-label="Play">
+                <svg class="bgm__play-icon" width="15" height="15" viewBox="0 0 24 24"
+                    aria-hidden="true">
+                    <path class="bgm__icon-play" d="M8 5v14l11-7z" fill="currentColor" />
+                    <path class="bgm__icon-pause" d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"
+                        fill="currentColor" />
+                </svg>
+            </button>
+            <label class="bgm__vol">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M11 5 6 9H3v6h3l5 4V5z" />
+                    <path d="M15.5 8.5a5 5 0 0 1 0 7" />
+                </svg>
+                <input type="range" id="bgm-volume" min="0" max="100" value="45" aria-label="Volume" />
+                <span class="bgm__vol-label mono" id="bgm-volume-label">45%</span>
+            </label>
+        </div>
+    </div>
+
     <script src="assets/js/repos.data.js"></script>
     <script src="assets/js/vendor/gsap.min.js"></script>
     <script src="assets/js/vendor/ScrollTrigger.min.js"></script>
@@ -523,6 +566,7 @@
     <script src="assets/js/work.js"></script>
     <script src="assets/js/avatar.js"></script>
     <script src="assets/js/site.js"></script>
+    <script src="assets/js/bgm.js"></script>
     <script src="assets/js/log-website.js"></script>
 </body>
 
