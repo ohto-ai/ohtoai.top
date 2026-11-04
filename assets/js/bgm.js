@@ -167,10 +167,12 @@
 
     volumeInput.addEventListener("input", function () {
         var v = Number(volumeInput.value) / 100;
-        audio.volume = v; // 立即生效；若正在淡入淡出，拖动会被下一帧盖回——停手即稳定
+        audio.volume = v; // 立即生效；正在进行的淡入淡出一并掐掉，以拖动值为准
         if (fadeTimer) {
             clearInterval(fadeTimer);
             fadeTimer = null;
+            // 打断的是淡出时，"关"的意图不能跟着丢：音量到不了 0 了，直接停
+            if (!wanted) audio.pause();
         }
         volumeLabel.textContent = volumeInput.value + "%";
     });
@@ -186,16 +188,27 @@
         wanted ? turnOff() : turnOn();
     });
 
+    // 候选源是逐个尝试的：每个拉不到的 <source> 各报一次 error（不冒泡，
+    // 得用捕获）。任一失败就置灰会误杀兜底 —— 主源 404 时 m4a 明明还能放。
+    // 数着来：全部候选源都拉不到才置灰。音频元素自身的 error（播放中途
+    // 断网之类）不属于候选源轮换，仍按致命处理。
+    var sourceCount = audio.querySelectorAll("source").length;
+    var deadSources = 0;
+
     audio.addEventListener(
         "error",
-        function () {
+        function (e) {
+            if (e.target !== audio) {
+                deadSources += 1;
+                if (deadSources < sourceCount) return;
+            }
             // 两个源都拉不到（比如文件被裁掉）：开关与面板一并置灰
             btn.disabled = true;
             btn.setAttribute("aria-disabled", "true");
             btn.title = "Background music unavailable";
             closePanel();
         },
-        true // <source> 的错误不冒泡到 audio，得用捕获
+        true
     );
 
     // 上次开着走：首次任意交互自动续上。

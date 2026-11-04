@@ -95,7 +95,9 @@
             if (!link) return;
             var id = link.getAttribute("href");
             if (!id || id === "#") return;
-            var target = document.querySelector(id);
+            // getElementById 而不是 querySelector(id)：后者按 CSS 选择器
+            // 解析，#1、#2020 这类非标识符会直接抛 SyntaxError
+            var target = document.getElementById(id.slice(1));
             if (!target) return;
 
             e.preventDefault();
@@ -383,33 +385,60 @@
        maximeheckel 用的就是这个手法（内部叫 --scene-follow-distance）。
        ====================================================================== */
     if (window.gsap && window.ScrollTrigger && !reduced) {
-        var wideEnough = window.matchMedia("(min-width: 861px)").matches;
+        // 首屏视差只在宽屏有意义，且断点要实时监听 —— 拖动窗口跨过
+        // 861px 时即时增删，而不是等下次刷新。
+        var wideQuery = window.matchMedia("(min-width: 861px)");
+        var heroParallax = null;
 
-        if (wideEnough) {
-            // 首屏文字：随滚动缓慢上移
-            gsap.to(".hero__copy", {
-                yPercent: -14,
-                ease: "none",
-                scrollTrigger: {
-                    trigger: ".hero",
-                    start: "top top",
-                    end: "bottom top",
-                    scrub: 0.6,
-                },
-            });
+        function setHeroParallax(on) {
+            if (on && !heroParallax) {
+                // 首屏文字：随滚动缓慢上移
+                var heroCopy = gsap.to(".hero__copy", {
+                    yPercent: -14,
+                    ease: "none",
+                    scrollTrigger: {
+                        trigger: ".hero",
+                        start: "top top",
+                        end: "bottom top",
+                        scrub: 0.6,
+                    },
+                });
 
-            // 常驻动画：移动得更快，拉开与文字的前后关系
-            gsap.to(".hero__char", {
-                yPercent: -34,
-                ease: "none",
-                scrollTrigger: {
-                    trigger: ".hero",
-                    start: "top top",
-                    end: "bottom top",
-                    scrub: 0.6,
-                },
-            });
+                // 常驻动画：移动得更快，拉开与文字的前后关系
+                var heroChar = gsap.to(".hero__char", {
+                    yPercent: -34,
+                    ease: "none",
+                    scrollTrigger: {
+                        trigger: ".hero",
+                        start: "top top",
+                        end: "bottom top",
+                        scrub: 0.6,
+                    },
+                });
+
+                heroParallax = [heroCopy, heroChar];
+            } else if (!on && heroParallax) {
+                heroParallax.forEach(function (tw) {
+                    if (tw.scrollTrigger) tw.scrollTrigger.kill();
+                    tw.kill();
+                });
+                // 补间杀掉后清残留位移，元素回到文档流原位。
+                // 不用 gsap.set 的 clearProps —— 它要等下一次 tick 才生效，
+                // 直接清内联样式是同步落地的。
+                Array.prototype.forEach.call(
+                    document.querySelectorAll(".hero__copy, .hero__char"),
+                    function (el) {
+                        el.style.transform = "";
+                    }
+                );
+                heroParallax = null;
+            }
         }
+
+        wideQuery.addEventListener("change", function (e) {
+            setHeroParallax(e.matches);
+        });
+        setHeroParallax(wideQuery.matches);
 
         // 背景网格整页缓慢漂移 —— 幅度很小，但整个页面因此有了"在动"的底子
         gsap.to(".site-bg", {

@@ -45,6 +45,7 @@
     var assets = {};
     var pending = CORE.length;
     var coreLoaded = false;
+    var baseFailed = false;
 
     /* ----------------------------------------------------------------------
        眼眶范围
@@ -128,6 +129,9 @@
        ---------------------------------------------------------------------- */
     function coreDone() {
         coreLoaded = true;
+        // 底图没了：stage 已在 onerror 里整个隐藏，眼眶留空的素材没有
+        // 意义，也不再起循环
+        if (baseFailed) return;
         if (reduced) {
             // 减少动效：一张静帧，不启动循环
             drawFrame(0, 0, false);
@@ -149,6 +153,12 @@
 
         img.onerror = function () {
             console.error("立绘素材加载失败:", SOURCES[key]);
+            // 底图加载失败就整体让位：藏掉画布，留线框底衬和辉光撑场面，
+            // 别让只有刘海和阴影的"悬空五官"留在页面上
+            if (key === "base") {
+                baseFailed = true;
+                stage.style.display = "none";
+            }
             if (!isCore) return;
             pending -= 1;
             if (pending === 0) coreDone();
@@ -209,6 +219,24 @@
     });
 
     /* ----------------------------------------------------------------------
+       stage 视口矩形缓存
+       每帧读 getBoundingClientRect 会在刚写完 transform 的元素上强制
+       同步布局。矩形只在滚动 / 缩放时才变，跟着事件刷新即可。
+       ---------------------------------------------------------------------- */
+    var stageRect = { left: 0, top: 0, width: 0, height: 0 };
+
+    function refreshRect() {
+        var r = stage.getBoundingClientRect();
+        stageRect.left = r.left;
+        stageRect.top = r.top;
+        stageRect.width = r.width;
+        stageRect.height = r.height;
+    }
+
+    window.addEventListener("resize", refreshRect, { passive: true });
+    window.addEventListener("scroll", refreshRect, { passive: true });
+
+    /* ----------------------------------------------------------------------
        动画循环
 
        移出视口就停 rAF，和背后的线框二十面体保持同一条性能纪律。
@@ -225,7 +253,7 @@
         if (now - last < 15) return;
         last = now;
 
-        var r = stage.getBoundingClientRect();
+        var r = stageRect;
         var cx = r.left + r.width * 0.5;
         var cy = r.top + r.height * 0.48;
         var tx = (pointer.x - cx) / Math.max(230, r.width * 0.72);
@@ -250,6 +278,7 @@
 
     function start() {
         if (running || reduced || !coreLoaded) return;
+        refreshRect();
         running = true;
         last = 0;
         nextBlink = performance.now() + 2600;

@@ -14,6 +14,7 @@
  *     的 Link 响应头（api-catalog / service-desc / service-doc /
  *     describedby / alternate）
  *   · 其余请求                      → 原样透传，浏览器行为不变
+ *   · 回源网络异常                  → 返回简洁的 502，不抛 Worker 运行时错误
  *
  * 部署方式见同目录 README.md。
  * 注意：若改用 Cloudflare 仪表盘的「Markdown for Agents」Beta 开关，
@@ -57,59 +58,72 @@ const SKIP_SELECTOR =
 
 export default {
   async fetch(request) {
-    const accept = request.headers.get("accept") || "";
-    const { pathname } = new URL(request.url);
-
-    // RFC 9727 API 目录：修正 Content-Type 后透传
-    if (pathname === API_CATALOG_PATH) {
-      const upstream = await fetch(request);
-      const headers = new Headers(upstream.headers);
-      headers.set("content-type", "application/linkset+json");
-      headers.set("vary", "accept");
-      return new Response(upstream.body, {
-        status: upstream.status,
-        headers,
-      });
-    }
-
-    // 普通浏览器/爬虫：透传并补上 Link 头
-    if (!MD_TYPES.test(accept)) {
-      return withLinkHeaders(await fetch(request));
-    }
-
-    const url = new URL(request.url);
-    // 回源时显式要 HTML —— 防止回源请求再被本 Worker 或边缘特性截获成环
-    const upstream = await fetch(url.toString(), {
-      headers: { accept: "text/html" },
-      redirect: "follow",
-    });
-
-    const ctype = (upstream.headers.get("content-type") || "").toLowerCase();
-    if (!ctype.includes("text/html")) {
-      // 非 HTML（图片/字体等）没有 Markdown 语义，原样回
-      return new Response(upstream.body, upstream);
-    }
-
-    // 转换失败绝不能把站点打挂 —— 降级为返回原 HTML（带 Link 头）
     try {
-      const markdown = await htmlToMarkdown(upstream, url);
-      // 粗估：英文语料约 4 字符 ≈ 1 token
-      const tokens = Math.ceil(markdown.length / 4);
+      const accept = request.headers.get("accept") || "";
+      const { pathname } = new URL(request.url);
 
-      const headers = new Headers({
-        "content-type": "text/markdown; charset=utf-8",
-        "x-markdown-tokens": String(tokens),
-        // 缓存必须区分 HTML / Markdown 两个变体
-        vary: "accept",
-        "cache-control": "no-store",
-      });
-      for (const link of LINK_HEADERS) {
-        headers.append("link", link);
+      // RFC 9727 API 目录：修正 Content-Type 后透传。
+      // 非 200（目录缺失、源站异常）原样透传 —— 不把错误体误标成 linkset+json
+      if (pathname === API_CATALOG_PATH) {
+        const upstream = await fetch(request);
+        if (!upstream.ok) return upstream;
+        const headers = new Headers(upstream.headers);
+        headers.set("content-type", "application/linkset+json");
+        headers.set("vary", "accept");
+        return new Response(upstream.body, {
+          status: upstream.status,
+          headers,
+        });
       }
-      return new Response(markdown, { status: 200, headers });
+
+      // 普通浏览器/爬虫：透传并补上 Link 头
+      if (!MD_TYPES.test(accept)) {
+        return withLinkHeaders(await fetch(request));
+      }
+
+      const url = new URL(request.url);
+      // 回源时显式要 HTML —— 防止回源请求再被本 Worker 或边缘特性截获成环
+      const upstream = await fetch(url.toString(), {
+        headers: { accept: "text/html" },
+        redirect: "follow",
+      });
+
+      const ctype = (upstream.headers.get("content-type") || "").toLowerCase();
+      if (!ctype.includes("text/html")) {
+        // 非 HTML（图片/字体等）没有 Markdown 语义，原样回
+        return new Response(upstream.body, upstream);
+      }
+
+      // 转换失败绝不能把站点打挂 —— 降级为返回原 HTML（带 Link 头）
+      try {
+        const markdown = await htmlToMarkdown(upstream, url);
+        // 粗估：英文语料约 4 字符 ≈ 1 token
+        const tokens = Math.ceil(markdown.length / 4);
+
+        const headers = new Headers({
+          "content-type": "text/markdown; charset=utf-8",
+          "x-markdown-tokens": String(tokens),
+          // 缓存必须区分 HTML / Markdown 两个变体；站点更新频率低，
+          // 浏览器 60s / 边缘 300s 足够新鲜，省掉每次回源+重转
+          vary: "accept",
+          "cache-control": "public, max-age=60, s-maxage=300",
+        });
+        for (const link of LINK_HEADERS) {
+          headers.append("link", link);
+        }
+        // 状态码跟上游走 —— 404 页转出来的 Markdown 也得让 Agent 看得出是 404
+        return new Response(markdown, { status: upstream.status, headers });
+      } catch (e) {
+        console.error("markdown conversion failed:", e);
+        return withLinkHeaders(upstream);
+      }
     } catch (e) {
-      console.error("markdown conversion failed:", e);
-      return withLinkHeaders(upstream);
+      // 源站不可达等网络层异常：给个简洁的 502，别让 Worker 以 1101 收场
+      console.error("worker failed:", e);
+      return new Response("Upstream unavailable\n", {
+        status: 502,
+        headers: { "content-type": "text/plain; charset=utf-8" },
+      });
     }
   },
 };

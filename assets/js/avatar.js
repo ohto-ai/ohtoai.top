@@ -26,8 +26,13 @@
     // 否则离屏 Image 也一样挂住 window.load（标签页转圈的老问题）
     var ABORT = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
 
+    // 本地兜底：升级失败时退回 index.html 里那个同源头像
+    var LOCAL = img.getAttribute("src") || "assets/img/avatar.png";
+
     function upgrade(src) {
         var probe = new Image();
+        // 离屏探测也是一次对外请求，隐私口径与可见 img 一致：不带 Referer
+        probe.referrerPolicy = "no-referrer";
         var done = false;
         var timer = setTimeout(function () {
             if (done) return;
@@ -38,6 +43,15 @@
             if (done) return;
             done = true;
             clearTimeout(timer);
+            // 正式 <img> 未必吃到 probe 的缓存（镜像可能不给缓存头），
+            // 挂一次性 onerror：升级加载失败就退回本地头像，不能留破图
+            img.addEventListener(
+                "error",
+                function () {
+                    img.src = LOCAL;
+                },
+                { once: true }
+            );
             img.src = src; // 高清版已就绪，无缝替换
         };
         probe.onerror = function () {
