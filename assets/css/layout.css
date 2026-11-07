@@ -416,6 +416,21 @@ html.js .site-nav[data-scrolled] {
     left: 0;
 }
 
+/* 剧照垫场：与画布同几何（JS 写 style），模型就绪后加 is-done 淡出。
+   指针事件关掉 —— 点击要落到 stage 上触发表情 */
+.hero__live2d-still {
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 1;
+    pointer-events: none;
+    transition: opacity 0.45s var(--ease);
+}
+
+.hero__live2d-still.is-done {
+    opacity: 0;
+}
+
 /* 文字压在动画之上。
    宽度必须收成内容宽度：块级元素默认占满整行，透明的那半截会盖住
    右侧立绘，把点击全部截走。 */

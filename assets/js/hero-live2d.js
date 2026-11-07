@@ -13,11 +13,13 @@
  *   cubism4.min.js            pixi-live2d-display 的 Cubism 4 构建
  *
  * 几条纪律（与 hero-canvas.js 一致）：
- *   · 懒加载：等揭幕结束 + 浏览器空闲才拉库和模型，首帧时间一分钱不多花
+ *   · 模型预热在脚本解析时就开跑 —— moc3 在揭幕幕布后面传输，
+ *     幕布拉开即近就绪；运行时库仍等揭幕结束再拉（并行、保序）
+ *   · 剧照（still.webp）垫场：加载期间先看静态荧，模型就绪淡入交接；
+ *     加载失败它就是最终形态；reduced-motion 下它替代整个模型下载
  *   · 出视口停 ticker，回视口再启动
- *   · 任何一步失败（库 404 / WebGL 不可用 / 模型损坏）都整个让位：
- *     藏掉 stage，留线框二十面体和辉光撑场面
- *   · prefers-reduced-motion：只渲染一帧静帧，不起循环不挂交互
+ *   · 任何一步失败（库 404 / WebGL 不可用 / 模型损坏）都优雅降级，
+ *     绝不留一个空壳
  */
 (function () {
     "use strict";
@@ -48,6 +50,8 @@
     var failed = false;
     var app = null;
     var model = null;
+    var stillImg = document.getElementById("hero-live2d-still");
+    var warmPromise = null;
 
     /* ----------------------------------------------------------------------
        失败让位
@@ -55,7 +59,10 @@
     function fail() {
         if (failed) return;
         failed = true;
-        stage.style.display = "none";
+        // 剧照是 HTML 自带的静态渲染帧，留在原地就是最终形态 ——
+        // 一张静态荧好过空线框。没有剧照才整个让位。
+        if (app && app.view) app.view.style.display = "none";
+        if (!stillImg) stage.style.display = "none";
         if (window.__heroLive2d) delete window.__heroLive2d;
     }
 
@@ -87,14 +94,15 @@
                 app.stage.addChild(m);
                 fit();
 
-                if (!reduced) {
-                    document.addEventListener("pointermove", onMove, { passive: true });
-                    stage.addEventListener("click", onTap);
-                    observe();
-                    app.ticker.start();
-                } else {
-                    // 减少动效：一帧静帧，不启动循环
-                    app.ticker.update(performance.now());
+                document.addEventListener("pointermove", onMove, { passive: true });
+                stage.addEventListener("click", onTap);
+                observe();
+                app.ticker.start();
+
+                // 剧照功成身退：淡出交接给活体（几何完全对齐，切换无感）
+                if (stillImg) {
+                    stillImg.classList.add("is-done");
+                    setTimeout(function () { stillImg.style.display = "none"; }, 450);
                 }
 
                 // 调试句柄：无头/停摆环境里可以手动 tickOnce() 推进一帧
@@ -115,7 +123,7 @@
             LIB + "pixi.min.js",
             LIB + "cubism4.min.js",
         ];
-        return Promise.all(
+        var scripts = Promise.all(
             sources.map(function (src) {
                 return new Promise(function (resolve, reject) {
                     var s = document.createElement("script");
@@ -128,7 +136,12 @@
                     document.head.appendChild(s);
                 });
             })
-        ).then(setup);
+        );
+        // 模型文件在幕布期间已由 warmModel() 预热 —— 这里等它落地，
+        // 运行时随后发起的请求直接命中 HTTP 缓存，不会二次下载
+        return scripts
+            .then(function () { return warmPromise; })
+            .then(setup);
     }
 
     /* ----------------------------------------------------------------------
@@ -158,12 +171,11 @@
         );
     }
 
-    function resize() {
-        if (!app) return;
+    /* 尺寸计算。stage-local 的 hero 底边距离用 offsetTop 链而不是
+       getBoundingClientRect：后者会被滚动位置和视差 transform 污染，
+       而 offsetTop 永远是布局意义上的静态相对距离。 */
+    function computeSize() {
         var w = stage.clientWidth || 1;
-        // stage-local 的 hero 底边距离。用 offsetTop 链而不是
-        // getBoundingClientRect：后者会被滚动位置和视差 transform 污染，
-        // 而 offsetTop 永远是布局意义上的静态相对距离。
         var stageTopDoc = 0;
         var hero = stage.closest(".hero");
         for (var el = stage; el; el = el.offsetParent) stageTopDoc += el.offsetTop;
@@ -171,9 +183,27 @@
             ? docTop(hero) + hero.offsetHeight - stageTopDoc
             : w;
         var h = Math.round(Math.min(w * 1.3, Math.max(w, heroBottomLocal - 8)));
-        app.renderer.resize(w, h);
+        return { w: w, h: h, heroBottomLocal: heroBottomLocal };
+    }
+
+    /* 剧照与画布同几何：位置/尺寸完全对齐，模型就绪后的淡入交接才是
+       无缝的。画布还没建出来时（加载期间）也要摆对 —— 那正是它值班
+       的时间。 */
+    function placeStill() {
+        if (!stillImg) return;
+        var size = computeSize();
+        stillImg.style.width = size.w + "px";
+        stillImg.style.height = size.h + "px";
+        stillImg.style.top = Math.round(size.heroBottomLocal - 8 - size.h) + "px";
+    }
+
+    function resize() {
+        placeStill();
+        if (!app) return;
+        var size = computeSize();
+        app.renderer.resize(size.w, size.h);
         // 画布底边贴 hero 底（向上留 8px），而不是居中
-        app.view.style.top = Math.round(heroBottomLocal - 8 - h) + "px";
+        app.view.style.top = Math.round(size.heroBottomLocal - 8 - size.h) + "px";
         fit();
     }
 
@@ -225,23 +255,46 @@
     }
 
     /* ----------------------------------------------------------------------
-       懒加载调度
-       揭幕结束（ohto:revealed，与 site.js 同一事件）后即开拉，rIC 只做
-       微调让位（800ms 兜底，避免主线程忙时无限饿死）。模型文件不依赖
-       脚本：贴图用 preload 提前并行拉，model3.json 顺手焐热 HTTP 缓存
-       —— 库就绪后直接命中，moc3 由运行时自己拉（预热它反而可能造成
-       双下载，浏览器不去重进行中的请求）。
+       预热 + 懒加载调度
+       moc3（brotli 后 ~2MB）是最大的等待项 —— 让它在揭幕幕布后面就
+       开始传输：本脚本在 body 末尾一解析就发起预热（页面其余资源
+       总共只有几百 KB，不构成竞争），幕布拉开时大概率已经就绪。
+       预热的 Promise 交给 boot() 等待：运行时随后发起的请求直接命中
+       HTTP 缓存，也避免预热请求还在途中时被二次下载。
+
+       reduced-motion 用户连这 5.5MB 都不必下：剧照（still.webp，66KB，
+       从实际渲染帧截取）本身就是"静态那一帧"，直接作为最终形态。
        ---------------------------------------------------------------------- */
+    function warmModel() {
+        if (warmPromise) return warmPromise;
+        warmPromise = fetch(MODEL_URL, { cache: "force-cache" })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+                var fr = d.FileReferences || {};
+                var files = [fr.Moc, fr.Physics]
+                    .concat(fr.Textures || [])
+                    .filter(Boolean)
+                    .map(function (p) { return new URL(p, MODEL_URL).href; });
+                return Promise.all(
+                    files.map(function (f) {
+                        return fetch(f, { cache: "force-cache" }).catch(function () {});
+                    })
+                );
+            })
+            .then(function () { return true; })
+            .catch(function () { return false; });
+        return warmPromise;
+    }
+    warmModel();
+    placeStill();
+
     function schedule() {
         if (scheduled) return;
         scheduled = true;
+        placeStill();
 
-        var link = document.createElement("link");
-        link.rel = "preload";
-        link.as = "image";
-        link.href = "assets/live2d/lumine/lumine.2048/texture_00.webp";
-        document.head.appendChild(link);
-        fetch(MODEL_URL).catch(function () { /* 预热失败不影响正式加载 */ });
+        // 减少动效：剧照即终点，不加载运行时和模型
+        if (reduced) return;
 
         var idle = window.requestIdleCallback
             ? function (cb) { window.requestIdleCallback(cb, { timeout: 800 }); }

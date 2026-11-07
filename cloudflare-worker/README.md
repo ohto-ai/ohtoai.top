@@ -1,6 +1,6 @@
 # 面向 Agent 的边缘增强 — 部署说明
 
-Worker 现在承担三件事：
+Worker 现在承担四件事：
 
 1. **Markdown for Agents**：请求带 `Accept: text/markdown` 时返回
    `Content-Type: text/markdown` 的正文（附 `x-markdown-tokens`），其余请求维持 HTML 不变。
@@ -11,6 +11,9 @@ Worker 现在承担三件事：
    转换结果）追加 `api-catalog` / `service-desc` / `service-doc` /
    `describedby` / `alternate` 的 Link 头 —— 源站（GitHub Pages）无法
    自定义响应头，同样只能在边缘加。
+4. **Live2D moc3 brotli 直通车**：请求 `/assets/live2d/**.moc3` 时回源取
+   同名 `.moc3.br`、挂 `Content-Encoding: br` 返回（lumine.moc3 4.9MB →
+   2.0MB）。`.br` 缺失则透传原文件；浏览器在传输层自动解压，运行时零感知。
 
 源站是 GitHub Pages 静态托管，以上都做不了，只能在 Cloudflare 边缘补
 （ohtoai.top 已走 Cloudflare 代理）。
@@ -69,6 +72,10 @@ Markdown 协商和 api-catalog 的 Content-Type 修正仍需要方案 A/B。
 ## 验证（部署任一边缘方案后）
 
 ```bash
+# moc3 brotli 直通车（本 Worker 部署后）：
+curl -s -o /dev/null -D - https://ohtoai.top/assets/live2d/lumine/lumine.moc3 \
+  | grep -i content-encoding   # 期望：content-encoding: br
+
 curl -s -m 60 -X POST https://isitagentready.com/api/scan \
   -H "Content-Type: application/json" \
   -d '{"url": "https://ohtoai.top"}'

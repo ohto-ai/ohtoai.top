@@ -260,7 +260,14 @@
                         <canvas id="hero-canvas"></canvas>
                     </div>
                     <div class="hero__char-glow"></div>
-                    <div class="hero__char-stage" id="hero-stage"></div>
+                    <div class="hero__char-stage" id="hero-stage">
+                        <!-- 剧照垫场：从实际渲染帧截取的静态荧（66KB），模型
+                             加载期间先由它占位，就绪后淡出无缝交接；加载
+                             失败时它就是最终形态；reduced-motion 下它是全部 -->
+                        <img class="hero__live2d-still" id="hero-live2d-still"
+                            src="assets/live2d/lumine/still.webp" alt=""
+                            aria-hidden="true" />
+                    </div>
                 </div>
 
                 <div class="hero__copy">

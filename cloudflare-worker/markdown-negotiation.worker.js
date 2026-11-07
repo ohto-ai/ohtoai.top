@@ -13,6 +13,8 @@
  *   · HTML 响应（含 Markdown 转换结果）统一追加 RFC 8288 / RFC 9727 §3
  *     的 Link 响应头（api-catalog / service-desc / service-doc /
  *     describedby / alternate）
+ *   · 请求 /assets/live2d/**.moc3 → 回源取同名的 .moc3.br（brotli，
+ *     体积约 40%），挂 Content-Encoding: br 返回；.br 缺失则透传原文件
  *   · 其余请求                      → 原样透传，浏览器行为不变
  *   · 回源网络异常                  → 返回简洁的 502，不抛 Worker 运行时错误
  *
@@ -74,6 +76,33 @@ export default {
           status: upstream.status,
           headers,
         });
+      }
+
+      // Live2D moc3 的 brotli 直通车：仓库同时放着 .moc3（原始）与
+      // .moc3.br（brotli q11，约为原始体积的 40%）。浏览器按 model3.json
+      // 请求 .moc3，边缘回源取 .br、挂上 Content-Encoding: br 原样回传
+      // —— 4.9MB → 2.0MB，解压发生在浏览器传输层，运行时零感知。
+      // 对应 .br 不存在（比如换了新模型还没生成）就自然回落到原始
+      // .moc3 的透传，站点永远可用。
+      if (
+        request.method === "GET" &&
+        pathname.startsWith("/assets/live2d/") &&
+        pathname.endsWith(".moc3")
+      ) {
+        const brUrl = new URL(pathname + ".br", request.url);
+        const upstream = await fetch(brUrl.toString());
+        if (upstream.ok) {
+          const headers = new Headers(upstream.headers);
+          headers.set("content-encoding", "br");
+          headers.set("content-type", "application/octet-stream");
+          // 缓存策略沿用源站头，不额外加码 —— 模型更新后最多等源站的
+          // 600s 过期窗口，比冒险长期缓存一个同名二进制要稳。
+          return new Response(upstream.body, {
+            status: upstream.status,
+            headers,
+          });
+        }
+        // 没有对应的 .br：落回下面的原始 .moc3 透传
       }
 
       // 普通浏览器/爬虫：透传并补上 Link 头
