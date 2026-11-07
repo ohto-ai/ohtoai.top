@@ -60,19 +60,6 @@
     }
 
     /* ----------------------------------------------------------------------
-       脚本按序加载：core → pixi → 插件，前一个失败整个放弃
-       ---------------------------------------------------------------------- */
-    function loadScript(src) {
-        return new Promise(function (resolve, reject) {
-            var s = document.createElement("script");
-            s.src = src;
-            s.onload = resolve;
-            s.onerror = function () { reject(new Error("live2d 依赖加载失败: " + src)); };
-            document.head.appendChild(s);
-        });
-    }
-
-    /* ----------------------------------------------------------------------
        装配
        ---------------------------------------------------------------------- */
     function setup() {
@@ -120,10 +107,28 @@
     }
 
     function boot() {
-        return loadScript(LIB + "live2dcubismcore.min.js")
-            .then(function () { return loadScript(LIB + "pixi.min.js"); })
-            .then(function () { return loadScript(LIB + "cubism4.min.js"); })
-            .then(setup);
+        // 三件套并行拉取、按序执行：串行要多付两次往返。
+        // 动态插入的脚本默认 async=true（谁先下完谁先跑），这里必须
+        // 显式 async=false 才能保证 core → pixi → 插件的执行顺序。
+        var sources = [
+            LIB + "live2dcubismcore.min.js",
+            LIB + "pixi.min.js",
+            LIB + "cubism4.min.js",
+        ];
+        return Promise.all(
+            sources.map(function (src) {
+                return new Promise(function (resolve, reject) {
+                    var s = document.createElement("script");
+                    s.src = src;
+                    s.async = false;
+                    s.onload = resolve;
+                    s.onerror = function () {
+                        reject(new Error("live2d 依赖加载失败: " + src));
+                    };
+                    document.head.appendChild(s);
+                });
+            })
+        ).then(setup);
     }
 
     /* ----------------------------------------------------------------------
@@ -221,15 +226,26 @@
 
     /* ----------------------------------------------------------------------
        懒加载调度
-       揭幕结束（ohto:revealed，与 site.js 同一事件）+ 空闲才开拉；
-       事件没来就 4.5s 兜底 —— 揭幕的保险丝是 4s，这里再晚半拍。
+       揭幕结束（ohto:revealed，与 site.js 同一事件）后即开拉，rIC 只做
+       微调让位（800ms 兜底，避免主线程忙时无限饿死）。模型文件不依赖
+       脚本：贴图用 preload 提前并行拉，model3.json 顺手焐热 HTTP 缓存
+       —— 库就绪后直接命中，moc3 由运行时自己拉（预热它反而可能造成
+       双下载，浏览器不去重进行中的请求）。
        ---------------------------------------------------------------------- */
     function schedule() {
         if (scheduled) return;
         scheduled = true;
+
+        var link = document.createElement("link");
+        link.rel = "preload";
+        link.as = "image";
+        link.href = "assets/live2d/lumine/lumine.2048/texture_00.webp";
+        document.head.appendChild(link);
+        fetch(MODEL_URL).catch(function () { /* 预热失败不影响正式加载 */ });
+
         var idle = window.requestIdleCallback
-            ? window.requestIdleCallback.bind(window)
-            : function (cb) { setTimeout(cb, 1200); };
+            ? function (cb) { window.requestIdleCallback(cb, { timeout: 800 }); }
+            : function (cb) { setTimeout(cb, 800); };
         idle(function () {
             boot().catch(function (err) {
                 console.error(err && err.message || "live2d 初始化失败", err);
