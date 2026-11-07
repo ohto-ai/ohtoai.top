@@ -1,0 +1,10 @@
+{
+    "Type": "Live2D Expression",
+    "Parameters": [
+        {
+            "Id": "ParamCollarChange",
+            "Value": 7.0,
+            "Blend": "Add"
+        }
+    ]
+}

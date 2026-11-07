@@ -286,13 +286,19 @@
     aspect-ratio: 4 / 3;
 }
 
+/* 横向卡片的图区不再自带宽高比：行高由文字栏撑起，图区跟随拉伸即可。
+   之前写死 5/4 时，aspect-ratio 会把图区撑到比网格轨道更宽，
+   直接盖住右栏文字 —— "PostLive" 只露出 "Live"。 */
 .work-card--h .work-card__shot {
-    aspect-ratio: 5 / 4;
+    aspect-ratio: auto;
+    min-width: 0;
     border-bottom: 0;
     border-right: 1px solid var(--border);
 }
 
 .work-card--h-flip .work-card__shot {
+    aspect-ratio: auto;
+    min-width: 0;
     border-right: 0;
     border-left: 1px solid var(--border);
 }

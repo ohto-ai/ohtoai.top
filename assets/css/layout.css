@@ -327,9 +327,10 @@ html.js .site-nav[data-scrolled] {
     position: relative;
 }
 
-/* 常驻动画：大户爱的立绘。
+/* 常驻动画：Live2D 立绘。
    放在首屏右半边那片空白里，补上版面重心。
-   画面由 hero-char.js 在 canvas 上分层合成（虹膜跟随 / 局部眨眼），
+   画面由 hero-live2d.js 懒加载运行时后在 canvas 上装配（视线跟随、
+   眨眼、物理、闲置动作都由 Cubism 运行时驱动），
    这里只管定位、呼吸和跟随光标的整体倾斜。 */
 .hero__char {
     position: absolute;
@@ -344,7 +345,8 @@ html.js .site-nav[data-scrolled] {
     margin-top: calc(clamp(300px, 38vw, 580px) / -2);
     z-index: 0;
     pointer-events: none;
-    /* 跟随光标的倾角加在 stage 层；这里只管呼吸和定位 */
+    /* 视线/头部的转向反应由 Live2D 模型自身的角度参数完成，
+       这里只管呼吸和定位 */
     transform-origin: 50% 78%;   /* 以"脖子"附近为轴，转动才自然 */
 }
 
@@ -395,8 +397,9 @@ html.js .site-nav[data-scrolled] {
     to   { transform: translateY(9px); }
 }
 
-/* 跟随光标平移 + 倾斜加在这一层（由 JS 写 transform）。
-   指针事件也只开在这一层：点角色会眨眼，背后的柔光和线框仍然穿透。 */
+/* 跟随光标平移 + 倾斜曾经由 JS 写在这一层的 transform 上；
+   换 Live2D 后这些反应全部交给模型自身的角度参数。
+   指针事件仍只开在这一层：点角色会触发动作，背后的柔光和线框仍然穿透。 */
 .hero__char-stage {
     position: relative;
     width: 100%;
@@ -406,11 +409,11 @@ html.js .site-nav[data-scrolled] {
     cursor: pointer;
 }
 
-/* 画布与素材共用 1200×1200 坐标系，显示尺寸完全交给 .hero__char */
-.hero__face {
-    display: block;
-    width: 100%;
-    height: 100%;
+/* Live2D 画布由运行时动态插入：JS 负责尺寸、加高与底边对齐
+   （style.top 直接写），这里只保留绝对定位的挂载方式 */
+.hero__live2d-canvas {
+    position: absolute;
+    left: 0;
 }
 
 /* 文字压在动画之上。

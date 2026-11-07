@@ -1,0 +1,10 @@
+{
+    "Type": "Live2D Expression",
+    "Parameters": [
+        {
+            "Id": "ParamBodyAngleX",
+            "Value": -1.1608575582504273,
+            "Blend": "Multiply"
+        }
+    ]
+}

@@ -1,0 +1,53 @@
+{
+	"Version": 3,
+	"Meta": {
+		"Duration": 9.983,
+		"Fps": 60.0,
+		"Loop": true,
+		"AreBeziersRestricted": true,
+		"CurveCount": 3,
+		"TotalSegmentCount": 3,
+		"TotalPointCount": 8,
+		"UserDataCount": 0,
+		"TotalUserDataSize": 0
+	},
+	"Curves": [
+		{
+			"Target": "Parameter",
+			"Id": "ParamAnime01",
+			"Segments": [
+				0,
+				0,
+				0,
+				9.983,
+				2520
+			]
+		},
+		{
+			"Target": "Parameter",
+			"Id": "ParamAnime2",
+			"Segments": [
+				0,
+				0,
+				0,
+				9.983,
+				50
+			]
+		},
+		{
+			"Target": "Parameter",
+			"Id": "ParamAnime3",
+			"Segments": [
+				0,
+				0,
+				1,
+				3.328,
+				0,
+				6.656,
+				60,
+				9.983,
+				60
+			]
+		}
+	]
+}

@@ -93,9 +93,6 @@
     <link rel="preload" as="font" type="font/woff2" crossorigin
         href="assets/fonts/inter/inter-latin-wght-normal.woff2" />
 
-    <!-- 立绘底图是首屏最大的那张图，先让浏览器开始下载 -->
-    <link rel="preload" as="image" type="image/webp" href="assets/img/face/base-clean.webp" />
-
     <link rel="stylesheet" href="assets/css/tokens.css" />
     <link rel="stylesheet" href="assets/css/base.css" />
     <link rel="stylesheet" href="assets/css/layout.css" />
@@ -251,21 +248,19 @@
              ================================================================== -->
         <section class="hero" id="top">
             <div class="container">
-                <!-- 常驻动画：大户爱，Canvas 分层合成 + 平滑跟随。
-                     v3.14 素材把眼睛、刘海、脸部阴影和发饰拆成独立图层：
-                     底图眼眶留空，两枚虹膜裁剪在眼眶内随光标连续移动，
-                     闭眼只叠加眼部覆盖层，刘海和发饰压在最上层。
-                     眨眼不再切换整张图，底图、头发和背景始终不动。 -->
+                <!-- 常驻动画：Live2D 立绘。画布由 hero-live2d.js 懒加载运行时后
+                     动态插入 #hero-stage —— 揭幕结束 + 浏览器空闲才开始拉
+                     ~700KB 库 + ~2.7MB 模型，不占首帧预算。
+                     当前挂的是官方示例 Haru（管线占位），后续整体换成正统荧。
+                     任何一步失败 stage 都整个让位，只剩线框底衬和辉光。 -->
                 <div class="hero__char" id="hero-char" aria-hidden="true">
-                    <!-- 旧版首屏那个自转的线框二十面体，现在退到立绘背后当底衬。
+                    <!-- 旧版首屏那个自转的线框二十面体，退到立绘背后当底衬。
                          比角色大一圈，只在她的轮廓之外露出来。 -->
                     <div class="hero__backdrop">
                         <canvas id="hero-canvas"></canvas>
                     </div>
                     <div class="hero__char-glow"></div>
-                    <div class="hero__char-stage" id="hero-stage">
-                        <canvas class="hero__face" id="hero-face" width="1200" height="1200"></canvas>
-                    </div>
+                    <div class="hero__char-stage" id="hero-stage"></div>
                 </div>
 
                 <div class="hero__copy">
@@ -486,8 +481,9 @@
              ================================================================== -->
         <section id="contact">
             <div class="container contact reveal">
-                <h2 class="contact__title">Let's work together</h2>
+                <!-- eyebrow 放标题上面，和 Work / About 的 section-head 同一节奏 -->
                 <p class="eyebrow" style="margin-bottom:1.25rem">Contact</p>
+                <h2 class="contact__title">Let's work together</h2>
                 <a class="contact__email" href="mailto:me@ohtoai.top">me@ohtoai.top</a>
             </div>
         </section>
@@ -560,7 +556,7 @@
     <script src="assets/js/vendor/ScrollTrigger.min.js"></script>
     <script src="assets/js/vendor/lenis.min.js"></script>
     <script src="assets/js/preloader.js"></script>
-    <script src="assets/js/hero-char.js"></script>
+    <script src="assets/js/hero-live2d.js"></script>
     <script src="assets/js/hero-canvas.js"></script>
     <script src="assets/js/work.js"></script>
     <script src="assets/js/avatar.js"></script>

@@ -1,0 +1,82 @@
+{
+	"Version": 3,
+	"FileReferences": {
+		"Moc": "lumine.moc3",
+		"Textures": [
+			"lumine.2048/texture_00.png"
+		],
+		"Physics": "lumine.physics3.json",
+		"DisplayInfo": "lumine.cdi3.json",
+		"Motions": {
+			"Idle": [
+				{
+					"File": "idle.motion3.json"
+				}
+			]
+		},
+		"Expressions": [
+			{
+				"Name": "exp_heart",
+				"File": "mothion/exp_heart.exp3.json"
+			},
+			{
+				"Name": "exp_sparkling",
+				"File": "mothion/exp_sparkling.exp3.json"
+			},
+			{
+				"Name": "exp_blush",
+				"File": "mothion/exp_blush.exp3.json"
+			},
+			{
+				"Name": "exp_zitome",
+				"File": "mothion/exp_zitome.exp3.json"
+			},
+			{
+				"Name": "exp_angry",
+				"File": "mothion/exp_angry.exp3.json"
+			},
+			{
+				"Name": "exp_sad",
+				"File": "mothion/exp_sad.exp3.json"
+			},
+			{
+				"Name": "exp_sweat",
+				"File": "mothion/exp_sweat.exp3.json"
+			},
+			{
+				"Name": "exp_dizzy",
+				"File": "mothion/exp_dizzy.exp3.json"
+			},
+			{
+				"Name": "exp_tear",
+				"File": "mothion/exp_tear.exp3.json"
+			}
+		]
+	},
+	"Groups": [
+		{
+			"Target": "Parameter",
+			"Name": "LipSync",
+			"Ids": [
+				"ParamMouthForm",
+				"ParamMouthOpenY",
+				"ParamMouthX",
+				"ParamtongueOut",
+				"ParamMouthFunnel",
+				"ParamMouthShrug",
+				"ParamMouthPuckerWiden",
+				"ParamJawOpen",
+				"ParamCheekPuffR",
+				"ParamCheekPuffL"
+			]
+		},
+		{
+			"Target": "Parameter",
+			"Name": "EyeBlink",
+			"Ids": [
+				"ParamEyeLOpen",
+				"ParamEyeROpen"
+			]
+		}
+	]
+}
